@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import React from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -510,17 +509,59 @@ export function RecipeImage({
   );
 }
 
-/** Works on web too, where Alert.alert with buttons does nothing. */
+interface ConfirmRequest {
+  title: string;
+  body: string;
+  okLabel: string;
+  cancelLabel: string;
+  destructive: boolean;
+  resolve: (ok: boolean) => void;
+}
+const useConfirm = create<{ request: ConfirmRequest | null; set: (r: ConfirmRequest | null) => void }>((set) => ({
+  request: null,
+  set: (request) => set({ request }),
+}));
+
+/**
+ * Asks before something irreversible. Drawn by the app itself (see ConfirmHost) rather than
+ * with Alert or window.confirm, which do not exist or are suppressed in some web contexts.
+ */
 export function confirm(title: string, body: string, okLabel: string, cancelLabel: string, destructive = true): Promise<boolean> {
-  if (Platform.OS === 'web') {
-    return Promise.resolve(typeof window !== 'undefined' ? window.confirm(body ? `${title}\n\n${body}` : title) : false);
-  }
   return new Promise((resolve) => {
-    Alert.alert(title, body, [
-      { text: cancelLabel, style: 'cancel', onPress: () => resolve(false) },
-      { text: okLabel, style: destructive ? 'destructive' : 'default', onPress: () => resolve(true) },
-    ], { cancelable: true, onDismiss: () => resolve(false) });
+    useConfirm.getState().request?.resolve(false);
+    useConfirm.getState().set({ title, body, okLabel, cancelLabel, destructive, resolve });
   });
+}
+
+export function ConfirmHost() {
+  const request = useConfirm((s) => s.request);
+  const c = useColors();
+  const answer = (ok: boolean) => {
+    request?.resolve(ok);
+    useConfirm.getState().set(null);
+  };
+  return (
+    <Modal visible={!!request} transparent animationType="fade" onRequestClose={() => answer(false)} statusBarTranslucent>
+      <View style={{ flex: 1, backgroundColor: c.overlay, alignItems: 'center', justifyContent: 'center', padding: space.xl }}>
+        <View
+          accessibilityRole="alert"
+          style={{ backgroundColor: c.card, borderRadius: radius.xl, padding: space.xl, gap: space.md, width: '100%', maxWidth: 380 }}>
+          <Txt v="h2">{request?.title}</Txt>
+          {request?.body ? <Txt color={c.sub}>{request.body}</Txt> : null}
+          <View style={{ flexDirection: 'row', gap: space.sm, marginTop: space.sm }}>
+            <Btn variant="secondary" title={request?.cancelLabel ?? ''} onPress={() => answer(false)} style={{ flex: 1 }} />
+            <Btn
+              variant={request?.destructive ? 'danger' : 'primary'}
+              title={request?.okLabel ?? ''}
+              onPress={() => answer(true)}
+              style={{ flex: 1 }}
+              testID="confirm-ok"
+            />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 }
 
 interface ToastState {

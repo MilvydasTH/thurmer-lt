@@ -246,3 +246,26 @@ describe('importer', () => {
     expect(unwrapSocialCaption('5 likes - a on May 1: "Hello there"')).toBe('Hello there');
   });
 });
+
+describe('scaling polish', () => {
+  const o = { system: 'original' as const, useDl: false, lang: 'en' as const };
+  it('rolls metric amounts over when scaled', () => {
+    expect(displayIngredient(parseIngredient('500 g minced pork'), { ...o, scale: 2 })).toBe('1 kg minced pork');
+    expect(displayIngredient(parseIngredient('600 ml stock'), { ...o, scale: 2 })).toBe('1.2 l stock');
+  });
+  it('keeps English nouns in agreement with the amount', () => {
+    expect(displayIngredient(parseIngredient('1 onion'), { ...o, scale: 2 })).toBe('2 onions');
+    expect(displayIngredient(parseIngredient('1 large egg, beaten'), { ...o, scale: 3 })).toBe('3 large eggs, beaten');
+    expect(displayIngredient(parseIngredient('1 tomato'), { ...o, scale: 2 })).toBe('2 tomatoes');
+    expect(displayIngredient(parseIngredient('1 bay leaf'), { ...o, scale: 2 })).toBe('2 bay leaves');
+    expect(displayIngredient(parseIngredient('2 eggs'), { ...o, scale: 0.5 })).toBe('1 egg');
+    expect(displayIngredient(parseIngredient('4 eggs'), { ...o, scale: 0.5 })).toBe('2 eggs');
+  });
+  it('leaves other languages exactly as written', () => {
+    expect(displayIngredient(parseIngredient('1 løg'), { ...o, lang: 'da', contentLang: 'da', scale: 2 })).toBe('2 løg');
+    expect(displayIngredient(parseIngredient('1 svogūnas'), { ...o, lang: 'en', contentLang: 'lt', scale: 2 })).toBe('2 svogūnas');
+  });
+  it('uses measuring-set fractions for cups', () => {
+    expect(formatQty(200 / 240, 'cup', 'en')).toBe('⅞');
+  });
+});

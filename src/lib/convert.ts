@@ -72,12 +72,18 @@ export function convertQty(
       return { qty: ml / 240, unit: 'cup' };
     }
   }
+  // No conversion asked for, but a scaled metric amount should still roll over: 1000 g → 1 kg.
+  if (unit === 'g' && qty >= 1000) return normalizeMass(qty);
+  if (unit === 'ml' && qty >= 1000) return normalizeVolume(qty, false);
+  if (unit === 'dl' && qty >= 10) return normalizeVolume(qty * 100, true);
   return { qty, unit };
 }
 
 const FRACTIONS: [number, string][] = [
   [0, ''], [0.25, '¼'], [1 / 3, '⅓'], [0.5, '½'], [2 / 3, '⅔'], [0.75, '¾'], [1, ''],
 ];
+const EIGHTHS: [number, string][] = [[0.125, '⅛'], [0.375, '⅜'], [0.625, '⅝'], [0.875, '⅞']];
+const SPOONS_AND_CUPS = new Set<UnitKey>(['cup', 'tbsp', 'tsp']);
 
 export function formatQty(qty: number, unit: UnitKey | undefined, lang: Lang): string {
   const comma = lang !== 'en';
@@ -86,21 +92,59 @@ export function formatQty(qty: number, unit: UnitKey | undefined, lang: Lang): s
     return comma ? s.replace('.', ',') : s;
   };
   if (unit && METRIC_UNITS.has(unit)) return dec(qty, unit === 'kg' || unit === 'l' ? 2 : 1);
-  if (qty < 0.2) return dec(qty, 2);
+  // Nobody measures 0.83 cup: spoons and cups always land on the nearest fraction a measuring set has.
+  const kitchen = !!unit && SPOONS_AND_CUPS.has(unit);
+  if (qty < 0.1) return dec(qty, 2);
+  const options = kitchen ? [...FRACTIONS, ...EIGHTHS] : FRACTIONS;
   const whole = Math.floor(qty);
   const frac = qty - whole;
-  let best = FRACTIONS[0];
-  for (const f of FRACTIONS) if (Math.abs(f[0] - frac) < Math.abs(best[0] - frac)) best = f;
-  // Only snap to a fraction when it is close; otherwise show a decimal rather than a wrong fraction.
-  if (Math.abs(best[0] - frac) > 0.06) return dec(qty, 1);
+  let best = options[0];
+  for (const f of options) if (Math.abs(f[0] - frac) < Math.abs(best[0] - frac)) best = f;
+  // For counts, only snap when it is close; otherwise a decimal is more honest than a wrong fraction.
+  if (!kitchen && Math.abs(best[0] - frac) > 0.06) return dec(qty, 1);
   const w = whole + (best[0] === 1 ? 1 : 0);
-  if (!best[1]) return String(w);
+  if (!best[1]) return w === 0 ? dec(qty, 2) : String(w);
   return w > 0 ? `${w} ${best[1]}` : best[1];
 }
 
 export interface DisplayOptions extends ConvertOptions {
   scale: number;
   lang: Lang;
+  /** Language the ingredient text is written in; enables plural fixes for English. */
+  contentLang?: string;
+}
+
+const UNCOUNTABLE = /^(garlic|butter|salt|pepper|sugar|flour|rice|water|milk|oil|parsley|basil|dill|spinach|broccoli|bread|cheese|pasta|ginger|celery|corn|bacon|ham|fish|salmon|tuna|cod|beef|pork|chicken)$/i;
+
+function pluralWord(w: string): string {
+  if (UNCOUNTABLE.test(w) || /s$/i.test(w)) return w;
+  if (/(leaf|loaf|half)$/i.test(w)) return w.replace(/f$/i, 'ves');
+  if (/[^aeiou]y$/i.test(w)) return w.replace(/y$/i, 'ies');
+  if (/(ch|sh|x|z|tomato|potato)$/i.test(w)) return `${w}es`;
+  return `${w}s`;
+}
+
+function singularWord(w: string): string {
+  if (/(leaves|loaves|halves)$/i.test(w)) return w.replace(/ves$/i, 'f');
+  if (/[^aeiou]ies$/i.test(w)) return w.replace(/ies$/i, 'y');
+  if (/(ches|shes|xes|zes|tomatoes|potatoes)$/i.test(w)) return w.replace(/es$/i, '');
+  if (/[^su]s$/i.test(w)) return w.replace(/s$/i, '');
+  return w;
+}
+
+/**
+ * "1 onion" doubled should read "2 onions", and "2 eggs" halved "1 egg". Only the noun right
+ * before the first comma or bracket is touched, and only for English text — other languages
+ * inflect in ways a suffix rule would get wrong, so they are left exactly as written.
+ */
+export function agreeEnglishNoun(name: string, before: number, after: number): string {
+  const wasPlural = before > 1;
+  const isPlural = after > 1;
+  if (wasPlural === isPlural) return name;
+  const m = name.match(/^([^,(]*?)([A-Za-z]+)(\s*(?:[,(].*)?)$/);
+  if (!m) return name;
+  const word = isPlural ? pluralWord(m[2]) : singularWord(m[2]);
+  return `${m[1]}${word}${m[3]}`;
 }
 
 function unitChanges(unit: UnitKey | undefined, system: UnitSystem): boolean {
@@ -126,7 +170,9 @@ export function displayIngredient(ing: Ingredient, opts: DisplayOptions): string
     if (b.unit === a.unit) qtyText += `–${formatQty(b.qty, b.unit, opts.lang)}`;
   }
   const u = a.unit ? unitLabel(a.unit, opts.lang, a.qty) : '';
-  return [qtyText, u, ing.name].filter(Boolean).join(' ');
+  const english = (opts.contentLang ?? opts.lang) === 'en';
+  const name = !a.unit && english && ing.qtyMax === undefined ? agreeEnglishNoun(ing.name, ing.qty, a.qty) : ing.name;
+  return [qtyText, u, name].filter(Boolean).join(' ');
 }
 
 const TEMP_RE = /(\d{2,3})\s*(?:(?:°|º|degrees?|deg\.?|grader|laipsni\p{L}*)\s*(F|C|fahrenheit|celsius)(?!\p{L})|(F)(?!\p{L}))/giu;

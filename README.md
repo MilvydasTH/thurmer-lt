@@ -1,56 +1,110 @@
-# Welcome to your Expo app 👋
+# Skanu
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A recipe keeper for iOS, Android and the web: save recipes from links, text or photos, organise
+them into cookbooks, plan the week, build the grocery list and cook step by step.
 
-## Get started
+The interface is in **English, Danish and Lithuanian**. Recipes stay in the language they were
+written in. It is free to use: no subscription, no trial, no account.
 
-1. Install dependencies
+Built with Expo (React Native) and Expo Router. One codebase for all three platforms.
 
-   ```bash
-   npm install
-   ```
+## What it does
 
-2. Start the app
+| Area | What you get |
+| --- | --- |
+| Save recipes | From a link (recipe sites publish structured data that is read directly), from pasted text, from a photo, or typed by hand. Imports open in the editor so you can check them before saving. |
+| Social links | Instagram, TikTok, YouTube, Pinterest and Facebook links are read from the post's caption. See [limits](#known-limits). |
+| Cookbooks | Your own collections, plus favourites, meal types and tags. Search covers titles, tags and ingredients. |
+| Servings and units | Scale any recipe. Switch between the recipe as written, metric (grams, ml or dl) and US cups. Cups of flour, sugar and similar become grams; oven temperatures convert too. |
+| Grocery list | Add a recipe's ingredients, or a whole planned week. Duplicates merge ("1 onion" + "2 onions"). View by aisle or by recipe. Pantry staples you always have are left out. |
+| Meal plan | Week view with breakfast, lunch, dinner and snack, and one button to send the week to the grocery list. |
+| Nutrition | Calories, protein, carbs and fat per serving, estimated from a built-in food table that understands ingredient names in all three languages. It says which ingredients it could not count. |
+| Cook mode | One step at a time in large type, screen kept awake, timers picked out of the step text. |
+| Share and backup | Share a recipe or the grocery list as text. Export and import the whole library as a file. |
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run it
 
 ```bash
-npm run reset-project
+npm install
+npm run web        # opens the app in a browser
+npm start          # then scan the QR code with Expo Go on a phone
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Checks:
 
-### Other setup steps
+```bash
+npm test           # unit tests for parsing, scaling, conversion, nutrition and import
+npm run typecheck
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### On a phone
 
-## Learn more
+`npm start` plus the Expo Go app is the quickest look. Two things need a real build instead of
+Expo Go: sharing a link *into* Skanu from another app, and the app icon. For that:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npx eas-cli@latest build --profile development --platform ios   # or android
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+`eas.json` has `development`, `preview` and `production` profiles. Publishing to the App Store
+needs an Apple Developer account; the bundle identifier is set to `com.thurmer.skanu` in
+`app.json` and can be changed there.
 
-## Join the community
+## The server part
 
-Join our community of developers creating universal apps.
+Most of the app runs entirely on the device. Three small server routes exist for the things a
+phone or browser cannot do alone:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- `POST /api/import` fetches a page for link import (browsers are not allowed to read other
+  sites; phones fetch recipe sites directly and only ask the server for social links).
+- `POST /api/ai` reads recipes from photos and unstructured text, and translates recipes.
+- `GET /api/status` tells the app whether AI is available.
+
+They are Expo Router API routes in `src/app/api`. In development they run inside `npm start`.
+To deploy the web app and the routes together:
+
+```bash
+npm run build:web
+npx eas-cli@latest deploy      # EAS Hosting; any Node host that runs `expo serve` also works
+```
+
+Then set `EXPO_PUBLIC_API_URL` to that deployment's address when building the phone apps.
+
+### AI features
+
+Set `ANTHROPIC_API_KEY` on the server (see `.env.example`). Without it the app still works; the
+"read with AI", photo reading and translation controls simply do not appear. The key is only
+read by the server routes and is never part of the app bundle. The routes have size limits but
+no login, so put them behind your host's rate limiting before sharing the app widely.
+
+## Known limits
+
+- **Recipes that are only spoken in a video cannot be imported.** Social imports read the caption.
+  Instagram in particular often refuses to hand captions to servers; when that happens the app
+  says so and you can paste the caption as text.
+- **No cloud sync or accounts.** The library lives on the device. Moving between devices is done
+  with the backup file. Sync needs a hosted database and sign-in, which is a product decision
+  (which provider, what it costs) rather than something to guess at.
+- **Ordering groceries opens the store's search, item by item** (Barbora and Rimi in Lithuania,
+  nemlig.com in Denmark). These stores offer no way for an app to fill a basket.
+- **Nutrition is an estimate** from about 110 common foods. Recipes that state their own
+  nutrition keep the source's figures.
+- **Timers run while cook mode is open.** They do not notify you after the app is closed.
+- Singular/plural fixes when scaling ("1 onion" → "2 onions") are done for English only; Danish
+  and Lithuanian ingredient lines keep their wording and only the number changes.
+
+## Project layout
+
+```
+src/app          screens and API routes (file-based routing)
+src/components   shared UI
+src/lib          parsing, conversion, nutrition, import: plain TypeScript, unit-tested
+src/data         food table and starter recipes
+src/i18n         en, da, lt
+src/server       server-only code (page fetching, AI)
+src/store        app state, saved on the device
+tests            unit tests
+```
+
+Adding a language: copy `src/i18n/en.ts`, translate it, register it in `src/i18n/index.ts`, and
+add its ingredient names to `src/data/foods.ts` and unit names to `src/lib/units.ts`.

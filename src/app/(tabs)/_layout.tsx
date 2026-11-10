@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import type { ColorValue } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useT } from '@/i18n';
 import { useStore } from '@/store';
@@ -18,6 +19,7 @@ const icon =
 export default function TabsLayout() {
   const t = useT();
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const left = useStore((s) => s.groceries.filter((g) => !g.checked).length);
   return (
     <Tabs
@@ -25,7 +27,14 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.sub,
-        tabBarStyle: { backgroundColor: c.card, borderTopColor: c.border },
+        // Explicit height: the default bar clips its labels on web.
+        tabBarStyle: {
+          backgroundColor: c.card,
+          borderTopColor: c.border,
+          height: 60 + insets.bottom,
+          paddingTop: 6,
+          paddingBottom: insets.bottom + 8,
+        },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         sceneStyle: { backgroundColor: c.bg },
       }}>

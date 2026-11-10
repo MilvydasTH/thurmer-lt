@@ -6,7 +6,7 @@ import React, { useEffect } from 'react';
 import { Platform, View } from 'react-native';
 
 import { IncomingShare } from '@/components/incoming-share';
-import { ToastHost } from '@/components/ui';
+import { ConfirmHost, ToastHost } from '@/components/ui';
 import { detectLang } from '@/i18n';
 import { useStore } from '@/store';
 import { useColors, useIsDark } from '@/theme';
@@ -52,6 +52,7 @@ export default function RootLayout() {
         <Stack.Screen name="cook/[id]" options={{ animation: 'fade', gestureEnabled: false }} />
       </Stack>
       {Platform.OS !== 'web' ? <IncomingShare /> : null}
+      <ConfirmHost />
       <ToastHost />
     </ThemeProvider>
   );

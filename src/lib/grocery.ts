@@ -69,8 +69,12 @@ function qtyText(items: GroceryItem[], lang: Lang, useDl: boolean): string {
   const first = withQty[0].unit;
   if (withQty.every((i) => i.unit === first)) {
     const sum = withQty.reduce((a, i) => a + i.qty!, 0);
-    const shown = first && (MASS[first] || VOLUME[first]) ? roundNice(sum) : sum;
-    return [formatQty(shown, first, lang), first ? unitLabel(first, lang, sum) : ''].filter(Boolean).join(' ');
+    // Metric sums roll over to the bigger unit below (1000 g → 1 kg); everything else stays in its own unit.
+    const rollsOver = (first === 'g' && sum >= 1000) || (first === 'ml' && sum >= 1000) || (first === 'dl' && sum >= 10);
+    if (!rollsOver) {
+      const shown = first && (MASS[first] || VOLUME[first]) ? roundNice(sum) : sum;
+      return [formatQty(shown, first, lang), first ? unitLabel(first, lang, sum) : ''].filter(Boolean).join(' ');
+    }
   }
   const dim = dimension(first);
   if (dim === 'mass') {

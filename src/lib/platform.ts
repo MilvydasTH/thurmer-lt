@@ -16,8 +16,9 @@ export async function shareText(text: string, title?: string): Promise<'shared' 
       try {
         await nav.share({ title, text });
         return 'shared';
-      } catch {
-        return 'cancelled';
+      } catch (e) {
+        // The person closing the share sheet is not a failure; anything else falls back to copying.
+        if (e instanceof Error && e.name === 'AbortError') return 'cancelled';
       }
     }
     await Clipboard.setStringAsync(text);

@@ -316,7 +316,9 @@ export const useStore = create<State>()(
         return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...p.settings } };
       },
       onRehydrateStorage: () => (state) => {
-        state?.setHydrated();
+        // `state` is missing when storage could not be read; the app must still open.
+        if (state) state.setHydrated();
+        else queueMicrotask(() => useStore.getState().setHydrated());
       },
     },
   ),
