@@ -9,6 +9,13 @@ import type { Lang, RecipeDraft, RecipeTranslation } from './types';
  */
 const BASE = (process.env.EXPO_PUBLIC_API_URL ?? '').replace(/\/$/, '');
 
+/** AbortSignal.timeout is missing on some React Native runtimes, so build the timeout by hand. */
+function timeoutSignal(ms: number): AbortSignal {
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+}
+
 export interface ServerStatus {
   reachable: boolean;
   ai: boolean;
@@ -20,7 +27,7 @@ export async function getServerStatus(force = false): Promise<ServerStatus> {
   if (!force && statusCache && Date.now() - statusCache.at < 60_000) return statusCache.value;
   let value: ServerStatus = { reachable: false, ai: false };
   try {
-    const res = await fetch(`${BASE}/api/status`, { signal: AbortSignal.timeout(6000) });
+    const res = await fetch(`${BASE}/api/status`, { signal: timeoutSignal(6000) });
     if (res.ok) {
       const j = (await res.json()) as { ai?: boolean };
       value = { reachable: true, ai: !!j.ai };
@@ -37,7 +44,7 @@ async function post<T>(path: string, body: unknown, timeoutMs = 90_000): Promise
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(timeoutMs),
+    signal: timeoutSignal(timeoutMs),
   });
   return (await res.json()) as T;
 }
@@ -55,7 +62,7 @@ export async function importFromUrl(url: string): Promise<UrlImport> {
     try {
       const res = await fetch(url, {
         headers: { accept: 'text/html,application/xhtml+xml' },
-        signal: AbortSignal.timeout(15_000),
+        signal: timeoutSignal(15_000),
       });
       if (res.ok) {
         direct = importFromHtml(await res.text(), res.url || url);
