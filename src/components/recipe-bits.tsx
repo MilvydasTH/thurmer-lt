@@ -3,12 +3,25 @@ import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { FOOD_IMAGES } from '@/data/foodImages';
+import { matchFood } from '@/data/foods';
 import { minutesLabel, useT } from '@/i18n';
 import type { Recipe } from '@/lib/types';
 import { useStore } from '@/store';
 import { radius, space, useColors } from '@/theme';
 
 import { Check, Empty, Field, MenuRow, RecipeImage, Sheet, Txt } from './ui';
+
+/** A recipe's own photo, or failing that a photo of its first ingredient we have a picture of. */
+export function coverImage(r: Pick<Recipe, 'image' | 'ingredients'>): string | undefined {
+  if (r.image) return r.image;
+  for (const ing of r.ingredients) {
+    if (ing.header) continue;
+    const food = matchFood(ing.name);
+    if (food && FOOD_IMAGES[food.id]) return `food:${food.id}`;
+  }
+  return undefined;
+}
 
 export function totalMinutes(r: Pick<Recipe, 'prepMin' | 'cookMin'>): number {
   return (r.prepMin ?? 0) + (r.cookMin ?? 0);
@@ -36,7 +49,7 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
         accessibilityRole="button"
         accessibilityLabel={recipe.title}
         style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.85 : 1 })}>
-        <RecipeImage uri={recipe.image} title={recipe.title} style={{ width: '100%', aspectRatio: 4 / 3 }} />
+        <RecipeImage uri={coverImage(recipe)} title={recipe.title} style={{ width: '100%', aspectRatio: 4 / 3 }} />
         <View style={{ padding: space.md, gap: 4 }}>
           <Txt v="h3" numberOfLines={2}>
             {recipe.title}
@@ -80,7 +93,7 @@ export function RecipeRow({ recipe, onPress, right }: { recipe: Recipe; onPress?
       accessibilityRole="button"
       accessibilityLabel={recipe.title}
       style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm, opacity: pressed ? 0.6 : 1 })}>
-      <RecipeImage uri={recipe.image} title={recipe.title} iconSize={20} style={{ width: 56, height: 56, borderRadius: radius.md }} />
+      <RecipeImage uri={coverImage(recipe)} title={recipe.title} iconSize={20} style={{ width: 56, height: 56, borderRadius: radius.md }} />
       <View style={{ flex: 1 }}>
         <Txt v="h3" numberOfLines={2}>
           {recipe.title}

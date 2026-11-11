@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { aisleFor, matchFood } from '../src/data/foods';
+import { aisleFor, foodsMentioned, matchFood } from '../src/data/foods';
 import { convertQty, convertTemperatures, displayIngredient, formatQty } from '../src/lib/convert';
 import { extractJsonLdRecipe, firstUrl, importFromHtml, isoDurationToMinutes, isSocialUrl, unwrapSocialCaption } from '../src/lib/importer';
 import { estimateNutrition } from '../src/lib/nutrition';
@@ -311,5 +311,14 @@ describe('store offers', () => {
     expect(storeCoverage({ a: [o('Netto'), o('Lidl')], b: [o('Netto')], c: [] })[0]).toEqual({ store: 'Netto', items: 2 });
     expect(formatPrice(39, 'DKK')).toBe('39 kr.');
     expect(formatPrice(29.95, 'DKK')).toBe('29,95 kr.');
+  });
+});
+
+describe('foods named in a step', () => {
+  it('lists them in order and keeps only the most specific name', () => {
+    expect(foodsMentioned('Boil the potatoes, then slice the cucumber and add olive oil.')).toEqual(['potato', 'cucumber', 'oliveoil']);
+    expect(foodsMentioned('Kog kartoflerne i saltet vand, og skær agurkerne i tern.')).toEqual(['potato', 'water', 'cucumber']);
+    expect(foodsMentioned('Bulves virkite pasūdytame vandenyje.')).toEqual(['potato', 'water']);
+    expect(foodsMentioned('Stir well and serve.')).toEqual([]);
   });
 });

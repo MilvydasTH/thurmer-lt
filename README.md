@@ -20,7 +20,7 @@ Built with Expo (React Native) and Expo Router. One codebase for all three platf
 | Store offers (Denmark) | For each item still to buy, the cart shows the cheapest current leaflet offer per store, compared per kilo or litre, and which stores cover most of the list. Ingredients are looked up under their Danish name, so English and Lithuanian recipes work too. Needs a Tjek API key, see below. |
 | Meal plan | Week view with breakfast, lunch, dinner and snack, and one button to send the week to the grocery list. |
 | Nutrition | Calories, protein, carbs and fat per serving, estimated from a built-in food table that understands ingredient names in all three languages. It says which ingredients it could not count. |
-| Cook mode | One step at a time in large type, screen kept awake, timers picked out of the step text. |
+| Cook mode | One step at a time in large type, screen kept awake, timers picked out of the step text. Each step shows photos of the ingredients it mentions, once photos are added to `assets/foods` (see the README there). A recipe without its own photo uses its main ingredient's. |
 | Share and backup | Share a recipe or the grocery list as text. Export and import the whole library as a file. |
 
 ## Run it

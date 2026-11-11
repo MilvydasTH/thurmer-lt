@@ -11,13 +11,13 @@ type Row = [string, Aisle, number, number, number, number, number, number, strin
 
 const ROWS: Row[] = [
   // Produce
-  ['onion', 'produce', 40, 1.1, 9.3, 0.1, 160, 110, 'onion|onions|yellow onion|red onion|shallot|shallots', 'løg|rødløg|skalotteløg', 'svogūn*'],
+  ['onion', 'produce', 40, 1.1, 9.3, 0.1, 160, 110, 'onion|onions|yellow onion|red onion|shallot|shallots', 'løg|rødløg|skalotteløg|løget|løgene', 'svogūn*'],
   ['garlic', 'produce', 149, 6.4, 33, 0.5, 136, 5, 'garlic|garlic clove|garlic cloves', 'hvidløg|hvidløgsfed', 'česnak*'],
-  ['tomato', 'produce', 18, 0.9, 3.9, 0.2, 180, 120, 'tomato|tomatoes|cherry tomatoes', 'tomat|tomater|cherrytomater', 'pomidor*'],
-  ['potato', 'produce', 77, 2, 17, 0.1, 150, 170, 'potato|potatoes', 'kartoffel|kartofler', 'bulv*'],
+  ['tomato', 'produce', 18, 0.9, 3.9, 0.2, 180, 120, 'tomato|tomatoes|cherry tomatoes', 'tomat|tomater|cherrytomater|tomaterne', 'pomidor*'],
+  ['potato', 'produce', 77, 2, 17, 0.1, 150, 170, 'potato|potatoes', 'kartoffel|kartofler|kartofl*', 'bulv*'],
   ['sweetpotato', 'produce', 86, 1.6, 20, 0.1, 133, 200, 'sweet potato|sweet potatoes', 'sød kartoffel|søde kartofler', 'batat*|saldži* bulv*'],
-  ['carrot', 'produce', 41, 0.9, 9.6, 0.2, 128, 60, 'carrot|carrots', 'gulerod|gulerødder', 'mork*'],
-  ['cucumber', 'produce', 15, 0.7, 3.6, 0.1, 120, 300, 'cucumber|cucumbers', 'agurk|agurker', 'agurk*'],
+  ['carrot', 'produce', 41, 0.9, 9.6, 0.2, 128, 60, 'carrot|carrots', 'gulerod|gulerødder|guleroden|gulerødderne', 'mork*'],
+  ['cucumber', 'produce', 15, 0.7, 3.6, 0.1, 120, 300, 'cucumber|cucumbers', 'agurk|agurker|agurken|agurkerne', 'agurk*'],
   ['bellpepper', 'produce', 31, 1, 6, 0.3, 150, 150, 'bell pepper|bell peppers|red pepper|green pepper|yellow pepper|capsicum', 'peberfrugt|peberfrugter', 'paprik*'],
   ['zucchini', 'produce', 17, 1.2, 3.1, 0.3, 124, 200, 'zucchini|courgette|courgettes', 'squash|courgette', 'cukinij*'],
   ['eggplant', 'produce', 25, 1, 6, 0.2, 82, 450, 'eggplant|aubergine|aubergines', 'aubergine|auberginer', 'baklažan*'],
@@ -27,7 +27,7 @@ const ROWS: Row[] = [
   ['broccoli', 'produce', 34, 2.8, 7, 0.4, 90, 300, 'broccoli', 'broccoli', 'brokol*'],
   ['cauliflower', 'produce', 25, 1.9, 5, 0.3, 100, 600, 'cauliflower', 'blomkål', 'žiedin* kopūst*|kalafior*'],
   ['mushroom', 'produce', 22, 3.1, 3.3, 0.3, 70, 18, 'mushroom|mushrooms', 'champignon|champignoner|svampe', 'gryb*|pievagryb*'],
-  ['beetroot', 'produce', 43, 1.6, 10, 0.2, 136, 100, 'beet|beets|beetroot|beetroots', 'rødbede|rødbeder', 'burokėl*|burok*'],
+  ['beetroot', 'produce', 43, 1.6, 10, 0.2, 136, 100, 'beet|beets|beetroot|beetroots', 'rødbede|rødbeder|rødbederne', 'burokėl*|burok*'],
   ['lemon', 'produce', 29, 1.1, 9, 0.3, 0, 60, 'lemon|lemons', 'citron|citroner', 'citrin*'],
   ['lemonjuice', 'produce', 22, 0.4, 6.9, 0.2, 240, 0, 'lemon juice|lime juice', 'citronsaft|limesaft', 'citrin* sul*|laim* sul*'],
   ['lime', 'produce', 30, 0.7, 10.5, 0.2, 0, 65, 'lime|limes', 'lime|limefrugt', 'laim*|žaliosi* citrin*'],
@@ -52,9 +52,9 @@ const ROWS: Row[] = [
   ['pumpkin', 'produce', 26, 1, 6.5, 0.1, 116, 0, 'pumpkin|butternut squash|butternut', 'græskar|hokkaido', 'moliūg*'],
 
   // Dairy & eggs
-  ['milk', 'dairy', 60, 3.3, 4.8, 3.2, 245, 0, 'milk|whole milk|skim milk', 'mælk|sødmælk|letmælk|minimælk|skummetmælk', 'pien*'],
-  ['butter', 'dairy', 717, 0.9, 0.1, 81, 227, 0, 'butter|unsalted butter|salted butter', 'smør', 'sviest*'],
-  ['cream', 'dairy', 340, 2.1, 2.8, 36, 240, 0, 'cream|heavy cream|double cream|whipping cream|single cream', 'fløde|piskefløde|madlavningsfløde', 'grietinėl*'],
+  ['milk', 'dairy', 60, 3.3, 4.8, 3.2, 245, 0, 'milk|whole milk|skim milk', 'mælk|sødmælk|letmælk|minimælk|skummetmælk|mælken', 'pien*'],
+  ['butter', 'dairy', 717, 0.9, 0.1, 81, 227, 0, 'butter|unsalted butter|salted butter', 'smør|smørret', 'sviest*'],
+  ['cream', 'dairy', 340, 2.1, 2.8, 36, 240, 0, 'cream|heavy cream|double cream|whipping cream|single cream', 'fløde|piskefløde|madlavningsfløde|fløden', 'grietinėl*'],
   ['sourcream', 'dairy', 193, 2.4, 4.6, 19, 230, 0, 'sour cream|creme fraiche|crème fraîche', 'creme fraiche|cremefraiche|crème fraîche', 'grietin*'],
   ['yogurt', 'dairy', 61, 3.5, 4.7, 3.3, 245, 0, 'yogurt|yoghurt|greek yogurt|plain yogurt', 'yoghurt|skyr|græsk yoghurt', 'jogurt*'],
   ['kefir', 'dairy', 50, 3.4, 4.7, 2, 245, 0, 'kefir|buttermilk', 'kærnemælk|kefir', 'kefyr*|pasuk*'],
@@ -63,7 +63,7 @@ const ROWS: Row[] = [
   ['feta', 'dairy', 264, 14, 4, 21, 150, 0, 'feta|feta cheese|halloumi', 'feta|fetaost|halloumi', 'feta|fetos|fetą'],
   ['curd', 'dairy', 98, 11, 3.4, 4.3, 225, 0, 'cottage cheese|quark|curd cheese|ricotta', 'hytteost|kvark|ricotta', 'varšk*'],
   ['creamcheese', 'dairy', 342, 6, 4, 34, 232, 0, 'cream cheese|mascarpone', 'flødeost|mascarpone', 'kremin* sūr*|maskarpon*'],
-  ['egg', 'dairy', 143, 12.6, 0.7, 9.5, 243, 50, 'egg|eggs|large egg|large eggs', 'æg', 'kiaušin*'],
+  ['egg', 'dairy', 143, 12.6, 0.7, 9.5, 243, 50, 'egg|eggs|large egg|large eggs', 'æg|ægget|æggene', 'kiaušin*'],
 
   // Meat & fish
   ['chicken', 'meat', 120, 22.5, 0, 2.6, 140, 170, 'chicken|chicken breast|chicken breasts|chicken fillet', 'kylling|kyllingebryst|kyllingefilet|kyllingebrystfilet', 'vištien*|višt*'],
@@ -87,7 +87,7 @@ const ROWS: Row[] = [
   ['breadcrumbs', 'pantry', 395, 13, 72, 5, 108, 0, 'breadcrumbs|bread crumbs|panko', 'rasp', 'džiūvėsėl*'],
 
   // Pantry
-  ['flour', 'pantry', 364, 10, 76, 1, 125, 0, 'flour|all-purpose flour|all purpose flour|plain flour|wheat flour|bread flour', 'mel|hvedemel', 'milt*'],
+  ['flour', 'pantry', 364, 10, 76, 1, 125, 0, 'flour|all-purpose flour|all purpose flour|plain flour|wheat flour|bread flour', 'mel|hvedemel|melet', 'milt*'],
   ['sugar', 'pantry', 387, 0, 100, 0, 200, 0, 'sugar|caster sugar|granulated sugar|white sugar', 'sukker', 'cukr*'],
   ['brownsugar', 'pantry', 380, 0, 98, 0, 213, 0, 'brown sugar', 'brun farin|farin|rørsukker', 'rud* cukr*'],
   ['powderedsugar', 'pantry', 389, 0, 100, 0, 120, 0, 'powdered sugar|icing sugar|confectioners sugar', 'flormelis', 'cukr* pudr*'],
@@ -104,7 +104,7 @@ const ROWS: Row[] = [
   ['mustard', 'pantry', 66, 4, 6, 3.3, 250, 0, 'mustard|dijon mustard', 'sennep|dijonsennep', 'garstyč*'],
   ['mayo', 'pantry', 680, 1, 0.6, 75, 220, 0, 'mayonnaise|mayo', 'mayonnaise|mayo', 'majonez*'],
   ['stock', 'pantry', 5, 0.5, 0.5, 0.2, 240, 0, 'stock|broth|chicken stock|vegetable stock|beef stock|chicken broth|vegetable broth|bouillon', 'bouillon|fond|hønsebouillon|grøntsagsbouillon', 'sultin*'],
-  ['water', 'other', 0, 0, 0, 0, 240, 0, 'water|cold water|warm water|boiling water', 'vand', 'vanduo|vandens|vandenį'],
+  ['water', 'other', 0, 0, 0, 0, 240, 0, 'water|cold water|warm water|boiling water', 'vand', 'vanduo|vanden*'],
   ['bakingpowder', 'pantry', 53, 0, 28, 0, 220, 0, 'baking powder', 'bagepulver', 'kepim* miltel*'],
   ['bakingsoda', 'pantry', 0, 0, 0, 0, 220, 0, 'baking soda|bicarbonate of soda', 'natron', 'soda|sodos|sodą'],
   ['yeast', 'pantry', 105, 8, 18, 1.9, 0, 0, 'yeast|dry yeast|instant yeast', 'gær|tørgær', 'miel*'],
@@ -222,4 +222,29 @@ export function aisleFor(name: string): Aisle {
 export function mentionsFood(text: string, foodId: string): boolean {
   const key = text.toLowerCase().replace(/\s+/g, ' ');
   return (BY_FOOD.get(foodId) ?? []).some((re) => re.test(key));
+}
+
+/** Ids of every food in the table, for tooling. */
+export const FOOD_IDS: string[] = ROWS.map((r) => r[0]);
+
+/**
+ * Foods named in a sentence, in the order they appear ("Boil the potatoes, then slice the
+ * cucumber" → potato, cucumber). A food whose name sits inside a longer one is dropped,
+ * so "olive oil" does not also count as "oil".
+ */
+export function foodsMentioned(text: string): string[] {
+  const key = text.toLowerCase().replace(/\s+/g, ' ');
+  const hits: { id: string; start: number; end: number }[] = [];
+  for (const [id, patterns] of BY_FOOD) {
+    let best: { start: number; end: number } | undefined;
+    for (const re of patterns) {
+      const m = re.exec(key);
+      if (m && (!best || m[0].length > best.end - best.start)) best = { start: m.index, end: m.index + m[0].length };
+    }
+    if (best) hits.push({ id, ...best });
+  }
+  return hits
+    .filter((h) => !hits.some((o) => o !== h && o.start <= h.start && o.end >= h.end && o.end - o.start > h.end - h.start))
+    .sort((a, b) => a.start - b.start)
+    .map((h) => h.id);
 }

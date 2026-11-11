@@ -6,7 +6,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, Vibration, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Btn, Empty, Header, IconBtn, Screen, Sheet, Txt, toast } from '@/components/ui';
+import { Btn, Empty, Header, IconBtn, RecipeImage, Screen, Sheet, Txt, toast } from '@/components/ui';
+import { FOOD_IMAGES } from '@/data/foodImages';
+import { foodsMentioned } from '@/data/foods';
 import { useLang, useT } from '@/i18n';
 import { convertTemperatures, displayIngredient } from '@/lib/convert';
 import { cancelTimerAlert, scheduleTimerAlert } from '@/lib/notify';
@@ -101,6 +103,8 @@ export default function CookScreen() {
       : recipe.ingredients;
   const step = steps[Math.min(index, steps.length - 1)];
   const suggestions = findTimers(step);
+  // Ingredients this step works with, for the pictures above the text.
+  const pictured = foodsMentioned(step).filter((id) => FOOD_IMAGES[id]).slice(0, 3);
   const last = index >= steps.length - 1;
   const close = () => (router.canGoBack() ? router.back() : router.replace(`/recipe/${recipe.id}`));
 
@@ -144,6 +148,19 @@ export default function CookScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: space.xl, gap: space.xl, flexGrow: 1, justifyContent: 'center' }}>
+        {pictured.length > 0 ? (
+          <View style={{ flexDirection: 'row', gap: space.sm }} testID="step-pictures">
+            {pictured.map((id) => (
+              <RecipeImage
+                key={id}
+                uri={`food:${id}`}
+                title={id}
+                // One picture gets a wide banner; several share the row as smaller tiles.
+                style={{ flex: 1, aspectRatio: pictured.length === 1 ? 16 / 9 : pictured.length === 2 ? 4 / 3 : 1, borderRadius: radius.lg }}
+              />
+            ))}
+          </View>
+        ) : null}
         <Txt style={{ fontSize: 26, lineHeight: 37, fontWeight: '500' }} testID="cook-step">
           {step}
         </Txt>

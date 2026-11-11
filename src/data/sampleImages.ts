@@ -1,3 +1,5 @@
+import { FOOD_IMAGES } from './foodImages';
+
 /**
  * Photos bundled with the app for the starter recipes. A recipe refers to one as "sample:<name>",
  * which keeps saved data small and lets the same recipe work on every platform.
@@ -13,5 +15,6 @@ export const SAMPLE_IMAGE_KEYS = ['sample:beetroot-soup', 'sample:frikadeller', 
 
 /** Turns a stored image reference into something an image component can load. */
 export function imageSource(uri: string): number | string | { uri: string } {
+  if (uri.startsWith('food:')) return FOOD_IMAGES[uri.slice(5)] ?? { uri };
   return BUNDLED[uri] ?? { uri };
 }

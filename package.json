@@ -61,7 +61,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint .",
-    "test:e2e": "node tests/e2e/walkthrough.mjs"
+    "test:e2e": "node tests/e2e/walkthrough.mjs",
+    "food-images": "node scripts/food-images.mjs"
   },
   "private": true
 }

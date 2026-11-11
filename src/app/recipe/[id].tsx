@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { coverImage } from '@/components/recipe-bits';
 import { CookbookPickSheet, GroceryAddSheet, PlanAddSheet } from '@/components/recipe-sheets';
 import { Btn, Card, Check, Chip, Empty, Header, IconBtn, MenuRow, RecipeImage, Screen, Segmented, Sheet, Txt, confirm, toast } from '@/components/ui';
 import { LANGUAGES, minutesLabel, useLang, useT, type Key, type TFn } from '@/i18n';
@@ -90,6 +91,7 @@ export default function RecipeScreen() {
     );
   }
 
+  const cover = coverImage(recipe);
   const scale = servings / (recipe.servings || 1);
   const opts = { scale, system: units, useDl: settings.useDl, lang, contentLang: translation ? view : recipe.lang };
   const lines = ingredients.filter((i) => !i.header).map((i) => displayIngredient(i, opts));
@@ -140,7 +142,7 @@ export default function RecipeScreen() {
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }}>
         <View>
-          <RecipeImage uri={recipe.image} title={recipe.title} iconSize={48} style={{ width: '100%', height: recipe.image ? 260 : 150 + insets.top }} />
+          <RecipeImage uri={cover} title={recipe.title} iconSize={48} style={{ width: '100%', height: cover ? 260 : 150 + insets.top }} />
           <View style={{ position: 'absolute', top: insets.top + space.sm, left: space.lg, right: space.lg, flexDirection: 'row', gap: space.sm }}>
             <IconBtn filled name="chevron-back" label={t('back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
             <View style={{ flex: 1 }} />
