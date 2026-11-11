@@ -1,3 +1,4 @@
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { router } from 'expo-router';
 import { useIncomingShare } from 'expo-sharing';
 import React, { useEffect } from 'react';
@@ -39,6 +40,8 @@ class Boundary extends React.Component<{ children: React.ReactNode }, { failed: 
 }
 
 export function IncomingShare() {
+  // Expo Go has no share extension, and asking it for shared content throws. Only real builds listen.
+  if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) return null;
   return (
     <Boundary>
       <Listener />
