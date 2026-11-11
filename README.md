@@ -13,7 +13,7 @@ Built with Expo (React Native) and Expo Router. One codebase for all three platf
 | Area | What you get |
 | --- | --- |
 | Save recipes | From a link (recipe sites publish structured data that is read directly), from pasted text, from a photo, or typed by hand. Imports open in the editor so you can check them before saving. |
-| Social links | Instagram, TikTok and YouTube links are read from the post's full caption or description, through each platform's embed data. Pinterest and Facebook links use the shorter link preview. See [limits](#known-limits). |
+| Social links | Instagram, Facebook, TikTok and YouTube links are read from the post's full caption or description, through each platform's embed data. Pinterest links use the shorter link preview. See [limits](#known-limits). |
 | Cookbooks | Your own collections, plus favourites, meal types and tags. Search covers titles, tags and ingredients. |
 | Servings and units | Scale any recipe. Switch between the recipe as written, metric (grams, ml or dl) and US cups. Cups of flour, sugar and similar become grams; oven temperatures convert too. |
 | Shopping cart | Add a recipe to the cart with one button, or a whole planned week. The cart shows which recipes are in it and everything you need to buy. Duplicates merge ("1 onion" + "2 onions"). View by aisle or by recipe. Pantry staples you always have are left out. Removing a recipe removes its ingredients. |

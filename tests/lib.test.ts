@@ -6,7 +6,7 @@ import { extractJsonLdRecipe, firstUrl, importFromHtml, isoDurationToMinutes, is
 import { estimateNutrition } from '../src/lib/nutrition';
 import { formatPrice, offerQuery, parseOffers, pickOffers, storeCoverage } from '../src/lib/offers';
 import { parseRecipeText } from '../src/lib/parseText';
-import { instagramShortcode, parseInstagramEmbed, parseTikTokOEmbed, parseYouTubeWatch, youtubeId } from '../src/lib/social';
+import { instagramShortcode, parseFacebookEmbed, parseInstagramEmbed, parseTikTokOEmbed, parseYouTubeWatch, youtubeId } from '../src/lib/social';
 import fixture from './fixtures/tjek-offers.json';
 import { findTimers, formatClock } from '../src/lib/timers';
 import { parseIngredient, parseIngredientLines } from '../src/lib/units';
@@ -350,5 +350,22 @@ describe('social posts', () => {
     expect(youtubeId('https://youtu.be/dQw4w9WgXcQ?si=x')).toBe('dQw4w9WgXcQ');
     expect(youtubeId('https://www.youtube.com/shorts/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
     expect(youtubeId('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=3')).toBe('dQw4w9WgXcQ');
+  });
+});
+
+describe('facebook posts', () => {
+  it('reads the whole post, including the part behind "See more"', () => {
+    const html = `<div class="_1"><div data-testid="post_message" class="_5pbx userContent _3576" data-ft="x"><p>Creamy chicken</p><p>500 g chicken<br /> 2 dl cream<span class="text_exposed_hide">...</span><span class="text_exposed_show"><br /> 1 onion</span></p><div class="text_exposed_show"><p>Fry the chicken, add the cream and simmer for 10 minutes.</p></div><span class="text_exposed_link"><a class="see_more_link" href="#">See more</a></span></div></div><div class="_2162">1.3K</div>`;
+    const post = parseFacebookEmbed(html)!;
+    expect(post.text).not.toContain('See more');
+    expect(post.text).not.toContain('...');
+    expect(post.text).not.toContain('1.3K');
+    const draft = parseRecipeText(post.text);
+    expect(draft.title).toBe('Creamy chicken');
+    expect(draft.ingredients).toEqual(['500 g chicken', '2 dl cream', '1 onion']);
+    expect(draft.steps).toEqual(['Fry the chicken, add the cream and simmer for 10 minutes.']);
+  });
+  it('returns nothing for an unavailable post', () => {
+    expect(parseFacebookEmbed('<div>This Facebook post is no longer available.</div>')).toBeUndefined();
   });
 });

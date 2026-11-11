@@ -1,5 +1,13 @@
 import { hostName } from '@/lib/importer';
-import { instagramShortcode, parseInstagramEmbed, parseTikTokOEmbed, parseYouTubeWatch, youtubeId, type SocialPost } from '@/lib/social';
+import {
+  instagramShortcode,
+  parseFacebookEmbed,
+  parseInstagramEmbed,
+  parseTikTokOEmbed,
+  parseYouTubeWatch,
+  youtubeId,
+  type SocialPost,
+} from '@/lib/social';
 
 import { APP_USER_AGENT } from './fetchPage';
 
@@ -41,6 +49,18 @@ export async function fetchSocialPost(url: string): Promise<SocialPost | undefin
     if (!id) return undefined;
     const res = await get(`https://www.youtube.com/watch?v=${id}`, 'text/html');
     return res ? parseYouTubeWatch(await res.text()) : undefined;
+  }
+
+  if (/(^|\.)(facebook\.com|fb\.watch)$/i.test(host)) {
+    let target = url;
+    // Share links (facebook.com/share/..., fb.watch/...) redirect to the post itself.
+    if (/fb\.watch$/i.test(host) || /facebook\.com\/share\//i.test(url)) {
+      const res = await get(url, 'text/html');
+      if (res && !/\/login/i.test(res.url)) target = res.url;
+    }
+    target = target.replace(/^https?:\/\/(m|mbasic|web)\.facebook\.com/i, 'https://www.facebook.com');
+    const res = await get(`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(target)}&show_text=true&width=500`, 'text/html');
+    return res ? parseFacebookEmbed(await res.text()) : undefined;
   }
 
   if (/(^|\.)tiktok\.com$/i.test(host)) {
