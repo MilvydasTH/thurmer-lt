@@ -1,11 +1,7 @@
-import { isSocialUrl } from '@/lib/importer';
-
 const MAX_BYTES = 3_000_000;
 
-const BROWSER_UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
-/** Social platforms serve caption metadata to link-preview crawlers that they hide from browsers. */
-const PREVIEW_UA = 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)';
+/** The importer says what it is; it does not pose as a browser or another company's crawler. */
+export const APP_USER_AGENT = 'Mozilla/5.0 (compatible; Skanu/1.0; recipe importer)';
 
 function isPrivateHost(host: string): boolean {
   const h = host.toLowerCase().replace(/^\[|\]$/g, '');
@@ -43,7 +39,7 @@ export async function fetchPage(rawUrl: string): Promise<{ html: string; url: st
         redirect: 'manual',
         signal: AbortSignal.timeout(12_000),
         headers: {
-          'user-agent': isSocialUrl(current.toString()) ? PREVIEW_UA : BROWSER_UA,
+          'user-agent': APP_USER_AGENT,
           accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
           'accept-language': 'en,da;q=0.9,lt;q=0.8',
         },

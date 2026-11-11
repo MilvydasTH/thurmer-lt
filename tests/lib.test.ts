@@ -6,6 +6,7 @@ import { extractJsonLdRecipe, firstUrl, importFromHtml, isoDurationToMinutes, is
 import { estimateNutrition } from '../src/lib/nutrition';
 import { formatPrice, offerQuery, parseOffers, pickOffers, storeCoverage } from '../src/lib/offers';
 import { parseRecipeText } from '../src/lib/parseText';
+import { instagramShortcode, parseInstagramEmbed, parseTikTokOEmbed, parseYouTubeWatch, youtubeId } from '../src/lib/social';
 import fixture from './fixtures/tjek-offers.json';
 import { findTimers, formatClock } from '../src/lib/timers';
 import { parseIngredient, parseIngredientLines } from '../src/lib/units';
@@ -320,5 +321,34 @@ describe('foods named in a step', () => {
     expect(foodsMentioned('Kog kartoflerne i saltet vand, og skær agurkerne i tern.')).toEqual(['potato', 'water', 'cucumber']);
     expect(foodsMentioned('Bulves virkite pasūdytame vandenyje.')).toEqual(['potato', 'water']);
     expect(foodsMentioned('Stir well and serve.')).toEqual([]);
+  });
+});
+
+describe('social posts', () => {
+  it('reads the whole Instagram caption from the embed page', () => {
+    const html = `<div class="EmbeddedMedia"><img class="EmbeddedMediaImage" alt="x" src="https://cdn.example/p.jpg?a=1&amp;b=2"/></div>
+<div class="Caption"><a class="CaptionUsername" href="https://www.instagram.com/cook/" target="_blank">cook</a><br /><br />Garlic noodles<br />200 g noodles<br />4 cloves garlic<br />2 tbsp soy sauce<br /><br />Boil the noodles, then toss with <a href="/x/">&#064;someone</a>&#39;s sauce.<div class="CaptionComments"><a class="CaptionCommentsExpand">View all 29 comments</a></div></div>`;
+    const post = parseInstagramEmbed(html)!;
+    expect(post.author).toBe('cook');
+    expect(post.image).toBe('https://cdn.example/p.jpg?a=1&b=2');
+    expect(post.text.split('\n')).toEqual(['Garlic noodles', '200 g noodles', '4 cloves garlic', '2 tbsp soy sauce', "Boil the noodles, then toss with @someone's sauce."]);
+    expect(parseRecipeText(post.text).ingredients).toHaveLength(3);
+  });
+  it('reads the full YouTube description', () => {
+    const html = `<meta property="og:title" content="Best pancakes"><script>var x = {"shortDescription":"Ingredients:\\n2 eggs\\n1 cup flour\\n\\nMethod:\\nMix \\"gently\\" and fry.","ownerChannelName":"Home Cook"};</script>`;
+    const post = parseYouTubeWatch(html)!;
+    expect(post.title).toBe('Best pancakes');
+    expect(post.author).toBe('Home Cook');
+    expect(post.text).toContain('Mix "gently" and fry.');
+    expect(parseRecipeText(post.text).ingredients).toEqual(['2 eggs', '1 cup flour']);
+  });
+  it('reads a TikTok caption and recognises post links', () => {
+    expect(parseTikTokOEmbed({ title: 'Quick ramen #food', author_name: 'chef' })).toMatchObject({ text: 'Quick ramen #food', author: 'chef' });
+    expect(parseTikTokOEmbed({ html: '<iframe>' })).toBeUndefined();
+    expect(instagramShortcode('https://www.instagram.com/reel/CUbHfhpswxt/?igsh=abc')).toBe('CUbHfhpswxt');
+    expect(instagramShortcode('https://www.instagram.com/someone/p/CUbHfhpswxt/')).toBe('CUbHfhpswxt');
+    expect(youtubeId('https://youtu.be/dQw4w9WgXcQ?si=x')).toBe('dQw4w9WgXcQ');
+    expect(youtubeId('https://www.youtube.com/shorts/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+    expect(youtubeId('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=3')).toBe('dQw4w9WgXcQ');
   });
 });
