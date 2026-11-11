@@ -294,4 +294,12 @@ export const lt: Dict = {
   crash_retry: 'Bandyti dar kartą',
   quick_link: 'Nuoroda',
   quick_write: 'Rašyti',
+  settings_translate_names: 'Versti ingredientų pavadinimus',
+  settings_translate_names_help: 'Dažniausius ingredientus receptuose ir krepšelyje rodo programėlės kalba. Gaminimo eiga lieka tokia, kokia parašyta.',
+  offers_finder: 'Ieškoti akcijų (Tilbud)',
+  offers_finder_ph: 'Ko ieškote? Pvz., kavos',
+  offers_finder_go: 'Ieškoti',
+  offers_finder_hint: 'Ieškokite šios savaitės Danijos prekybos centrų leidiniuose. Galite rašyti lietuviškai, daniškai arba angliškai.',
+  offers_finder_none: 'Šiuo metu akcijų prekei „{name}“ nėra.',
+  offers_finder_count: 'Akcijų prekei „{name}“: {n}, pigiausios viršuje',
 };

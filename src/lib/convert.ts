@@ -1,5 +1,6 @@
 import { matchFood, type Food } from '../data/foods';
 import type { Ingredient, Lang, UnitKey, UnitSystem } from './types';
+import { translateName } from './translateName';
 import { unitLabel } from './units';
 
 const ML: Partial<Record<UnitKey, number>> = {
@@ -112,6 +113,8 @@ export interface DisplayOptions extends ConvertOptions {
   lang: Lang;
   /** Language the ingredient text is written in; enables plural fixes for English. */
   contentLang?: string;
+  /** When set, known ingredient names are shown in this language. */
+  nameLang?: Lang;
 }
 
 const UNCOUNTABLE = /^(garlic|butter|salt|pepper|sugar|flour|rice|water|milk|oil|parsley|basil|dill|spinach|broccoli|bread|cheese|pasta|ginger|celery|corn|bacon|ham|fish|salmon|tuna|cod|beef|pork|chicken)$/i;
@@ -159,9 +162,15 @@ function unitChanges(unit: UnitKey | undefined, system: UnitSystem): boolean {
  */
 export function displayIngredient(ing: Ingredient, opts: DisplayOptions): string {
   if (ing.header) return ing.name;
-  if (ing.qty === undefined) return ing.raw;
+  if (ing.qty === undefined) {
+    return (opts.nameLang && translateName(ing.name, opts.nameLang, { measured: false }, opts.contentLang)) || ing.raw;
+  }
   const scaled = Math.abs(opts.scale - 1) > 1e-6;
-  if (!scaled && !unitChanges(ing.unit, opts.system)) return ing.raw;
+  // Does the name change with the language? (Form does not matter for the yes/no answer.)
+  const renames = !!opts.nameLang && translateName(ing.name, opts.nameLang, { measured: !!ing.unit, qty: ing.qty }, opts.contentLang) !== undefined;
+  // Spoon, cup and count units are words too ("tsp" / "tsk" / "a. š."), so they follow the app's language with the names.
+  const relabels = !!opts.nameLang && !!ing.unit && !METRIC_UNITS.has(ing.unit) && opts.contentLang !== opts.nameLang;
+  if (!scaled && !unitChanges(ing.unit, opts.system) && !renames && !relabels) return ing.raw;
 
   const a = convertQty(ing.qty * opts.scale, ing.unit, ing.name, opts);
   let qtyText = formatQty(a.qty, a.unit, opts.lang);
@@ -171,7 +180,8 @@ export function displayIngredient(ing: Ingredient, opts: DisplayOptions): string
   }
   const u = a.unit ? unitLabel(a.unit, opts.lang, a.qty) : '';
   const english = (opts.contentLang ?? opts.lang) === 'en';
-  const name = !a.unit && english && ing.qtyMax === undefined ? agreeEnglishNoun(ing.name, ing.qty, a.qty) : ing.name;
+  const translated = renames ? translateName(ing.name, opts.nameLang!, { measured: !!a.unit, qty: ing.qtyMax ?? a.qty }, opts.contentLang) : undefined;
+  const name = translated ?? (!a.unit && english && ing.qtyMax === undefined ? agreeEnglishNoun(ing.name, ing.qty, a.qty) : ing.name);
   return [qtyText, u, name].filter(Boolean).join(' ');
 }
 

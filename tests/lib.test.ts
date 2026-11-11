@@ -9,6 +9,7 @@ import { parseRecipeText } from '../src/lib/parseText';
 import { instagramShortcode, parseFacebookEmbed, parseInstagramEmbed, parseTikTokOEmbed, parseYouTubeWatch, youtubeId } from '../src/lib/social';
 import fixture from './fixtures/tjek-offers.json';
 import { findTimers, formatClock } from '../src/lib/timers';
+import { translateName } from '../src/lib/translateName';
 import { parseIngredient, parseIngredientLines } from '../src/lib/units';
 
 const p = (s: string) => {
@@ -367,5 +368,47 @@ describe('facebook posts', () => {
   });
   it('returns nothing for an unavailable post', () => {
     expect(parseFacebookEmbed('<div>This Facebook post is no longer available.</div>')).toBeUndefined();
+  });
+});
+
+describe('ingredient names in the app language', () => {
+  const m = { measured: true };
+  it('translates known foods with the right word form', () => {
+    expect(translateName('minced pork', 'da', m)).toBe('hakket svinekød');
+    expect(translateName('minced pork', 'lt', m)).toBe('maltos kiaulienos');
+    expect(translateName('flour', 'lt', m)).toBe('miltų');
+    expect(translateName('eggs', 'da', { measured: false, qty: 2 })).toBe('æg');
+    expect(translateName('onion', 'da', { measured: false, qty: 3 })).toBe('løg');
+    expect(translateName('carrot', 'da', { measured: false, qty: 3 })).toBe('gulerødder');
+    expect(translateName('kiaušiniai', 'en', { measured: false, qty: 4 })).toBe('eggs');
+    expect(translateName('hvedemel', 'en', m)).toBe('flour');
+  });
+  it('inflects Lithuanian counts', () => {
+    const egg = (qty: number) => translateName('egg', 'lt', { measured: false, qty });
+    expect([egg(1), egg(2), egg(9), egg(10), egg(12), egg(21), egg(1.5)]).toEqual([
+      'kiaušinis', 'kiaušiniai', 'kiaušiniai', 'kiaušinių', 'kiaušinių', 'kiaušinis', 'kiaušinio',
+    ]);
+  });
+  it('keeps words it cannot translate, in brackets', () => {
+    expect(translateName('fresh eggs', 'da', { measured: false, qty: 2 })).toBe('æg (fresh)');
+    expect(translateName('butter, softened', 'da', m)).toBe('smør (softened)');
+    expect(translateName('Fresh basil', 'lt', { measured: false })).toBe('Bazilikas');
+  });
+  it('leaves names alone when already in the language, unknown, or a different product', () => {
+    expect(translateName('smør', 'da', m)).toBeUndefined();
+    expect(translateName('dragon fruit', 'da', m)).toBeUndefined();
+    expect(translateName('thyme', 'da', m)).toBeUndefined();
+    expect(translateName('shallots', 'lt', m)).toBeUndefined();
+    expect(translateName('is', 'en', m, 'en')).toBeUndefined();
+  });
+  it('shows whole ingredient lines translated', () => {
+    const o = { scale: 1, system: 'original' as const, useDl: false };
+    expect(displayIngredient(parseIngredient('500 g minced pork'), { ...o, lang: 'da', nameLang: 'da', contentLang: 'en' })).toBe('500 g hakket svinekød');
+    expect(displayIngredient(parseIngredient('3 tbsp flour'), { ...o, lang: 'lt', nameLang: 'lt', contentLang: 'en' })).toBe('3 v. š. miltų');
+    expect(displayIngredient(parseIngredient('2 eggs'), { ...o, lang: 'lt', nameLang: 'lt', contentLang: 'en' })).toBe('2 kiaušiniai');
+    expect(displayIngredient(parseIngredient('1 løg'), { ...o, lang: 'en', nameLang: 'en', contentLang: 'da', scale: 2 })).toBe('2 onions');
+    expect(displayIngredient(parseIngredient('2 spsk smør'), { ...o, lang: 'da', nameLang: 'da', contentLang: 'da' })).toBe('2 spsk smør');
+    expect(displayIngredient(parseIngredient('1 tsp thyme'), { ...o, lang: 'da', nameLang: 'da', contentLang: 'en' })).toBe('1 tsk thyme');
+    expect(displayIngredient(parseIngredient('1 tsp thyme'), { ...o, lang: 'da', contentLang: 'en' })).toBe('1 tsp thyme');
   });
 });

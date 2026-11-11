@@ -25,6 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   store: 'auto',
   offers: false,
   offersNearby: false,
+  translateNames: true,
 };
 
 export const DEFAULT_PANTRY: Record<Lang, string[]> = {
@@ -82,6 +83,7 @@ interface State {
   clearGroceries: () => void;
 
   updateSettings: (patch: Partial<Settings>) => void;
+  setLanguage: (lang: Lang) => void;
   exportBackup: () => Backup;
   importBackup: (data: unknown) => number;
   resetAll: () => void;
@@ -260,6 +262,22 @@ export const useStore = create<State>()(
       clearGroceries: () => set({ groceries: [] }),
 
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
+
+      setLanguage: (lang) =>
+        set((s) => {
+          // Starter recipes nobody has edited follow the app's language; everything else is the user's own text.
+          const recipes = s.recipes.map((r) => {
+            if (r.createdAt !== r.updatedAt) return r;
+            for (const from of ['en', 'da', 'lt'] as const) {
+              const i = SAMPLES[from].findIndex((d) => d.title === r.title);
+              if (i >= 0 && from !== lang) return { ...draftToRecipe(SAMPLES[lang][i], r), updatedAt: r.createdAt };
+            }
+            return r;
+          });
+          // Carry the starter pantry over to the new language if it was never customised.
+          const untouched = JSON.stringify(s.settings.pantry) === JSON.stringify(DEFAULT_PANTRY[s.settings.lang]);
+          return { recipes, settings: { ...s.settings, lang, ...(untouched ? { pantry: DEFAULT_PANTRY[lang] } : {}) } };
+        }),
 
       exportBackup: () => {
         const s = get();

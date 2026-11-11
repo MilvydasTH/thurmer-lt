@@ -174,4 +174,6 @@ export interface Settings {
   offers: boolean;
   /** Limit offers to stores around the phone's rough position. */
   offersNearby: boolean;
+  /** Show known ingredient names in the app's language, whatever language the recipe is in. */
+  translateNames: boolean;
 }

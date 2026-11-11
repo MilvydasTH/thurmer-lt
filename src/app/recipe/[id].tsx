@@ -93,7 +93,7 @@ export default function RecipeScreen() {
 
   const cover = coverImage(recipe);
   const scale = servings / (recipe.servings || 1);
-  const opts = { scale, system: units, useDl: settings.useDl, lang, contentLang: translation ? view : recipe.lang };
+  const opts = { scale, system: units, useDl: settings.useDl, lang, contentLang: translation ? view : recipe.lang, nameLang: settings.translateNames ? lang : undefined };
   const lines = ingredients.filter((i) => !i.header).map((i) => displayIngredient(i, opts));
   const steps = (translation?.steps.length ? translation.steps : recipe.steps).map((s) => convertTemperatures(s, units));
   const title = translation?.title || recipe.title;

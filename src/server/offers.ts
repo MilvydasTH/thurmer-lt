@@ -66,3 +66,10 @@ export async function findOffers(items: { key: string; name: string }[], near?: 
   await Promise.all(Array.from({ length: Math.min(4, queue.length) }, worker));
   return { byItem, failed };
 }
+
+/** Free search for the offers finder: every current offer matching what the shopper typed, cheapest per kilo or litre first. */
+export async function searchOffers(text: string, near?: Near): Promise<Offer[]> {
+  const query = offerQuery(text);
+  if (query.length < 2) return [];
+  return pickOffers(await search(query, near), text, query, Date.now(), 40, false);
+}

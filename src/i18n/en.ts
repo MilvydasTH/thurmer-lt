@@ -304,4 +304,12 @@ export const en = {
   crash_retry: 'Try again',
   quick_link: 'Link / video',
   quick_write: 'Write',
+  settings_translate_names: 'Translate ingredient names',
+  settings_translate_names_help: 'Shows common ingredients in the app’s language in recipes and the cart. The method text stays as written.',
+  offers_finder: 'Find offers (Tilbud)',
+  offers_finder_ph: 'What are you looking for? e.g. coffee',
+  offers_finder_go: 'Search',
+  offers_finder_hint: 'Search this week’s leaflets from Danish supermarkets. Type in English, Danish or Lithuanian.',
+  offers_finder_none: 'No current offers for “{name}”.',
+  offers_finder_count: '{n} offers for “{name}”, cheapest first',
 };

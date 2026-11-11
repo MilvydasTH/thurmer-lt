@@ -294,4 +294,12 @@ export const da: Dict = {
   crash_retry: 'Prøv igen',
   quick_link: 'Link / video',
   quick_write: 'Skriv',
+  settings_translate_names: 'Oversæt ingrediensnavne',
+  settings_translate_names_help: 'Viser almindelige ingredienser på appens sprog i opskrifter og kurven. Fremgangsmåden bliver som den er skrevet.',
+  offers_finder: 'Find tilbud',
+  offers_finder_ph: 'Hvad leder du efter? F.eks. kaffe',
+  offers_finder_go: 'Søg',
+  offers_finder_hint: 'Søg i ugens tilbudsaviser fra danske supermarkeder.',
+  offers_finder_none: 'Ingen aktuelle tilbud på “{name}”.',
+  offers_finder_count: '{n} tilbud på “{name}”, billigst først',
 };

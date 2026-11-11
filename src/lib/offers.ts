@@ -96,7 +96,7 @@ const DAY = 86_400_000;
  * Offers worth showing for one item: relevant, running now or starting within a week,
  * cheapest per kilo/litre first, one per store.
  */
-export function pickOffers(offers: Offer[], itemName: string, query: string, now: number, limit = 8): Offer[] {
+export function pickOffers(offers: Offer[], itemName: string, query: string, now: number, limit = 8, onePerStore = true): Offer[] {
   const live = offers.filter((o) => {
     if (!isRelevant(o, itemName, query)) return false;
     const from = o.runFrom ? Date.parse(o.runFrom) : NaN;
@@ -110,8 +110,10 @@ export function pickOffers(offers: Offer[], itemName: string, query: string, now
   const seen = new Set<string>();
   const out: Offer[] = [];
   for (const o of live) {
-    if (seen.has(o.store)) continue;
-    seen.add(o.store);
+    // The finder lists every offer; the cart keeps the best one per store.
+    const key = onePerStore ? o.store : `${o.store}|${o.heading}|${o.price}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     out.push(o);
     if (out.length >= limit) break;
   }

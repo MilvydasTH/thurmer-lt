@@ -1,6 +1,7 @@
 import { aisleFor, matchFood } from '../data/foods';
 import { formatQty, roundNice } from './convert';
 import type { Aisle, GroceryItem, Ingredient, Lang, Recipe, UnitKey } from './types';
+import { translateName } from './translateName';
 import { normalizeName, parseIngredient, unitLabel } from './units';
 
 const MASS: Partial<Record<UnitKey, number>> = { g: 1, kg: 1000, oz: 28.35, lb: 453.6 };
@@ -54,6 +55,10 @@ export interface MergedItem {
   checked: boolean;
   aisle: Aisle;
   recipes: string[];
+  /** Bought by weight or volume rather than by count; decides the word form when the name is translated. */
+  measured?: boolean;
+  /** Total count when every entry is a bare number ("3 onions"). */
+  count?: number;
 }
 
 function dimension(unit: UnitKey | undefined): string {
@@ -112,14 +117,23 @@ export function mergeGroceries(items: GroceryItem[], lang: Lang, useDl: boolean)
       checked: g.every((i) => i.checked),
       aisle: g[0].aisle,
       recipes: [...new Set(g.map((i) => i.recipeTitle).filter((t): t is string => !!t))],
+      measured: g.some((i) => i.qty !== undefined && !!i.unit),
+      count: g.every((i) => i.qty !== undefined && !i.unit) ? g.reduce((a, i) => a + i.qty!, 0) : undefined,
     });
   }
   return out;
 }
 
-export function itemLabel(it: GroceryItem, lang: Lang): string {
-  if (it.qty === undefined) return it.name;
-  return [formatQty(it.qty, it.unit, lang), it.unit ? unitLabel(it.unit, lang, it.qty) : '', it.name].filter(Boolean).join(' ');
+/** A cart item's name, in the app's language when it is a known food and translation is on. */
+export function cartName(name: string, lang: Lang, translate: boolean, form: { measured?: boolean; count?: number }): string {
+  if (!translate) return name;
+  return translateName(name, lang, { measured: !!form.measured, qty: form.count }) ?? name;
+}
+
+export function itemLabel(it: GroceryItem, lang: Lang, translate = false): string {
+  const name = cartName(it.name, lang, translate, { measured: it.qty !== undefined && !!it.unit, count: it.unit ? undefined : it.qty });
+  if (it.qty === undefined) return name;
+  return [formatQty(it.qty, it.unit, lang), it.unit ? unitLabel(it.unit, lang, it.qty) : '', name].filter(Boolean).join(' ');
 }
 
 export interface Store {

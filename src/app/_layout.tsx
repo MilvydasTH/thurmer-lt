@@ -60,6 +60,7 @@ export default function RootLayout() {
         <Stack.Screen name="recipe/[id]" />
         <Stack.Screen name="recipe/edit" />
         <Stack.Screen name="import" />
+        <Stack.Screen name="offers" />
         <Stack.Screen name="cookbook/[id]" />
         <Stack.Screen name="cook/[id]" options={{ animation: 'fade', gestureEnabled: false }} />
       </Stack>

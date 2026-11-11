@@ -7,7 +7,7 @@ import { LANGUAGES, useT } from '@/i18n';
 import { getServerStatus, type ServerStatus } from '@/lib/api';
 import { approximatePlace } from '@/lib/location';
 import { pickTextFile, saveTextFile } from '@/lib/platform';
-import { DEFAULT_PANTRY, useStore } from '@/store';
+import { useStore } from '@/store';
 import { space, useColors } from '@/theme';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -73,13 +73,21 @@ export default function SettingsScreen() {
           <Segmented
             value={settings.lang}
             options={LANGUAGES}
-            onChange={(lang) => {
-              // Carry the starter pantry over to the new language if it was never customised.
-              const untouched = JSON.stringify(settings.pantry) === JSON.stringify(DEFAULT_PANTRY[settings.lang]);
-              update({ lang, ...(untouched ? { pantry: DEFAULT_PANTRY[lang] } : {}) });
-            }}
+            onChange={(lang) => useStore.getState().setLanguage(lang)}
           />
           <Txt v="small">{t('settings_language_help')}</Txt>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+            <View style={{ flex: 1 }}>
+              <Txt v="h3">{t('settings_translate_names')}</Txt>
+              <Txt v="small">{t('settings_translate_names_help')}</Txt>
+            </View>
+            <Switch
+              value={settings.translateNames}
+              onValueChange={(translateNames) => update({ translateNames })}
+              accessibilityLabel={t('settings_translate_names')}
+              trackColor={{ true: c.accent, false: c.border }}
+            />
+          </View>
         </Section>
 
         <Section title={t('settings_units')}>

@@ -15,3 +15,16 @@ export async function findOffers(items: { key: string; name: string }[], near?: 
     return { ok: false, error: 'network' };
   }
 }
+
+export type OfferSearch = { ok: true; offers: Offer[] } | { ok: false; error: 'not_configured' | 'network' };
+
+/** Free-text search across current store offers, for the offers finder. */
+export async function searchOffers(query: string, near?: { lat: number; lng: number }): Promise<OfferSearch> {
+  try {
+    const res = await apiPost<{ ok: boolean; offers?: Offer[]; error?: string }>('/api/offers', { query, near }, 30_000);
+    if (res.ok && res.offers) return { ok: true, offers: res.offers };
+    return { ok: false, error: res.error === 'not_configured' ? 'not_configured' : 'network' };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}

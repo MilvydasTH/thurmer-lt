@@ -54,7 +54,7 @@ export function GroceryAddSheet({
           key={i.id}
           checked={picked.includes(i.id)}
           onPress={() => setPicked((p) => (p.includes(i.id) ? p.filter((x) => x !== i.id) : [...p, i.id]))}
-          label={displayIngredient(i, { scale, system: settings.units, useDl: settings.useDl, lang, contentLang: recipe.lang })}
+          label={displayIngredient(i, { scale, system: settings.units, useDl: settings.useDl, lang, contentLang: recipe.lang, nameLang: settings.translateNames ? lang : undefined })}
           sub={isPantryItem(i.name, settings.pantry) ? t('in_pantry') : undefined}
         />
       ))}

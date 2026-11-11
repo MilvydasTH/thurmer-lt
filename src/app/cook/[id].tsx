@@ -228,7 +228,7 @@ export default function CookScreen() {
             </Txt>
           ) : (
             <Txt key={ing.id} style={{ paddingVertical: 4 }}>
-              {displayIngredient(ing, { scale, system: units, useDl: settings.useDl, lang, contentLang: translation ? params.view : recipe.lang })}
+              {displayIngredient(ing, { scale, system: units, useDl: settings.useDl, lang, contentLang: translation ? params.view : recipe.lang, nameLang: settings.translateNames ? lang : undefined })}
             </Txt>
           ),
         )}

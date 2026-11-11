@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Btn, Card, Check, Empty, Header, IconBtn, MenuRow, Screen, Segmented, Sheet, Txt, confirm, toast } from '@/components/ui';
 import { useLang, useT, type Key, type TFn } from '@/i18n';
 import { approximatePlace } from '@/lib/location';
-import { itemLabel, manualGrocery, mergeGroceries, storesFor, type MergedItem } from '@/lib/grocery';
+import { cartName, itemLabel, manualGrocery, mergeGroceries, storesFor, type MergedItem } from '@/lib/grocery';
 import { formatPrice, startsLater, storeCoverage, type Offer } from '@/lib/offers';
 import { findOffers } from '@/lib/offersApi';
 import { openUrl, shareText } from '@/lib/platform';
@@ -45,6 +45,10 @@ export default function CartScreen() {
   const storeId = useStore((s) => s.settings.store);
   const offersOn = useStore((s) => s.settings.offers);
   const nearby = useStore((s) => s.settings.offersNearby);
+  const translate = useStore((s) => s.settings.translateNames);
+  // Shown name: in the app's language when we know the food. Offers and store searches keep the original.
+  // Rows built for the by-recipe view already carry a finished label and have no `measured`.
+  const shown = (m: MergedItem) => (m.measured === undefined ? m.name : cartName(m.name, lang, translate, m));
   const [line, setLine] = useState('');
   const [sheet, setSheet] = useState<null | 'menu' | 'order'>(null);
   const [offers, setOffers] = useState<Record<string, Offer[]>>({});
@@ -122,7 +126,7 @@ export default function CartScreen() {
 
   const listText = () =>
     byAisle
-      .map((g) => `${t(`aisle_${g.aisle}` as Key)}\n${g.items.filter((i) => !i.checked).map((i) => `☐ ${[i.qtyText, i.name].filter(Boolean).join(' ')}`).join('\n')}`)
+      .map((g) => `${t(`aisle_${g.aisle}` as Key)}\n${g.items.filter((i) => !i.checked).map((i) => `☐ ${[i.qtyText, shown(i)].filter(Boolean).join(' ')}`).join('\n')}`)
       .filter((block) => block.includes('☐'))
       .join('\n\n');
 
@@ -140,7 +144,7 @@ export default function CartScreen() {
         strike
         checked={m.checked}
         onPress={() => useStore.getState().setGroceriesChecked(m.ids, !m.checked)}
-        label={[m.qtyText, m.name].filter(Boolean).join(' ')}
+        label={[m.qtyText, shown(m)].filter(Boolean).join(' ')}
         sub={best ? offerLine(best) : m.recipes.length > 0 ? m.recipes.join(' · ') : undefined}
         subColor={best ? c.accent : undefined}
         right={
@@ -164,7 +168,12 @@ export default function CartScreen() {
       <Header
         large
         title={t('groceries_title')}
-        right={groceries.length > 0 ? <IconBtn name="ellipsis-horizontal" label={t('more')} onPress={() => setSheet('menu')} /> : null}
+        right={
+          <>
+            <IconBtn name="pricetags-outline" label={t('offers_finder')} onPress={() => router.push('/offers')} />
+            {groceries.length > 0 ? <IconBtn name="ellipsis-horizontal" label={t('more')} onPress={() => setSheet('menu')} /> : null}
+          </>
+        }
       />
       <View style={{ paddingHorizontal: space.lg, gap: space.sm, paddingBottom: space.sm }}>
         <View style={{ flexDirection: 'row', gap: space.sm }}>
@@ -300,11 +309,12 @@ export default function CartScreen() {
                   {title || t('groceries_manual')}
                 </Txt>
                 {items.map((it) =>
-                  row({ key: it.id, name: itemLabel(it, lang), qtyText: '', ids: [it.id], checked: it.checked, aisle: it.aisle, recipes: [] }, false),
+                  row({ key: it.id, name: itemLabel(it, lang, translate), qtyText: '', ids: [it.id], checked: it.checked, aisle: it.aisle, recipes: [] }, false),
                 )}
               </Card>
             ))}
 
+        <Btn variant="secondary" icon="pricetags-outline" title={t('offers_finder')} onPress={() => router.push('/offers')} testID="open-offers" />
         {!offersOn && left.length > 0 ? (
           <Btn variant="secondary" icon="pricetag-outline" title={t('offers_enable')} onPress={() => useStore.getState().updateSettings({ offers: true })} testID="offers-enable" />
         ) : null}
@@ -341,7 +351,7 @@ export default function CartScreen() {
         ))}
       </Sheet>
 
-      <Sheet visible={offerItem !== null} onClose={() => setOfferItem(null)} title={offerItem ? t('offers_for', { name: offerItem.name }) : ''}>
+      <Sheet visible={offerItem !== null} onClose={() => setOfferItem(null)} title={offerItem ? t('offers_for', { name: shown(offerItem) }) : ''}>
         {(offerItem ? (offers[offerItem.key] ?? []) : []).map((o) => (
           <View key={o.id} style={{ flexDirection: 'row', gap: space.md, paddingVertical: space.sm, alignItems: 'center' }}>
             {o.image ? (
