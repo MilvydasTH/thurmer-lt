@@ -23,6 +23,7 @@ export const DEFAULT_SETTINGS: Settings = {
   pantry: [],
   groceryView: 'aisle',
   store: 'auto',
+  offers: false,
 };
 
 export const DEFAULT_PANTRY: Record<Lang, string[]> = {
@@ -171,6 +172,8 @@ export const useStore = create<State>()(
             units: lang === 'en' ? 'original' : 'metric',
             useDl: lang === 'da',
             pantry: DEFAULT_PANTRY[lang],
+            // The offers are Danish, so they start switched on only for Danish devices.
+            offers: lang === 'da',
           },
         }));
         if (get().recipes.length === 0) get().addSamples();

@@ -133,6 +133,21 @@ export default function SettingsScreen() {
           </View>
         </Section>
 
+        <Section title={t('settings_offers')}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+            <View style={{ flex: 1 }}>
+              <Txt v="h3">{t('offers_enable')}</Txt>
+              <Txt v="small">{t('settings_offers_help')}</Txt>
+            </View>
+            <Switch
+              value={settings.offers}
+              onValueChange={(offers) => update({ offers })}
+              accessibilityLabel={t('offers_enable')}
+              trackColor={{ true: c.accent, false: c.border }}
+            />
+          </View>
+        </Section>
+
         <Section title={t('settings_backup')}>
           <Txt v="small">{t('settings_backup_help', { n: recipeCount })}</Txt>
           <MenuRow icon="download-outline" title={t('settings_export')} onPress={exportData} />

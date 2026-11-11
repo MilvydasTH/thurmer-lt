@@ -4,7 +4,9 @@ import { aisleFor, matchFood } from '../src/data/foods';
 import { convertQty, convertTemperatures, displayIngredient, formatQty } from '../src/lib/convert';
 import { extractJsonLdRecipe, firstUrl, importFromHtml, isoDurationToMinutes, isSocialUrl, unwrapSocialCaption } from '../src/lib/importer';
 import { estimateNutrition } from '../src/lib/nutrition';
+import { formatPrice, offerQuery, parseOffers, pickOffers, storeCoverage } from '../src/lib/offers';
 import { parseRecipeText } from '../src/lib/parseText';
+import fixture from './fixtures/tjek-offers.json';
 import { findTimers, formatClock } from '../src/lib/timers';
 import { parseIngredient, parseIngredientLines } from '../src/lib/units';
 
@@ -267,5 +269,47 @@ describe('scaling polish', () => {
   });
   it('uses measuring-set fractions for cups', () => {
     expect(formatQty(200 / 240, 'cup', 'en')).toBe('⅞');
+  });
+});
+
+describe('store offers', () => {
+  const now = Date.parse('2026-11-11T12:00:00Z');
+  it('searches under the Danish name of an ingredient', () => {
+    expect(offerQuery('minced beef')).toBe('hakket oksekød');
+    expect(offerQuery('500 g pieno'.replace('500 g ', ''))).toBe('mælk');
+    expect(offerQuery('hakket oksekød')).toBe('hakket oksekød');
+    expect(offerQuery('piskefløde')).toBe('piskefløde');
+    expect(offerQuery('dishwasher tablets')).toBe('dishwasher tablets');
+  });
+  it('reads real API offers, with a per-kilo price', () => {
+    const offers = parseOffers(fixture);
+    expect(offers.length).toBe(12);
+    const first = offers[0];
+    expect(first.store).toBe('Lidl');
+    expect(first.price).toBe(29.95);
+    expect(first.unitPrice).toEqual({ value: 74.88, unit: 'kg' });
+  });
+  it('keeps one relevant, current offer per store, cheapest per kilo first', () => {
+    const picked = pickOffers(parseOffers(fixture), 'minced beef', 'hakket oksekød', now);
+    expect(picked.length).toBeGreaterThan(2);
+    expect(new Set(picked.map((o) => o.store)).size).toBe(picked.length);
+    const prices = picked.map((o) => o.unitPrice?.value ?? Infinity);
+    expect([...prices].sort((a, b) => a - b)).toEqual(prices);
+  });
+  it('drops expired offers and near-misses', () => {
+    const offers = parseOffers([
+      { id: 'a', heading: 'Løgismose økologisk kefir', pricing: { price: 18, currency: 'DKK' }, branding: { name: 'Netto' }, run_till: '2026-12-01T00:00:00+0000' },
+      { id: 'b', heading: 'Arla letmælk', pricing: { price: 9, currency: 'DKK' }, branding: { name: 'Netto' }, run_till: '2026-11-01T00:00:00+0000' },
+      { id: 'c', heading: 'Arla sødmælk', pricing: { price: 11, pre_price: 14, currency: 'DKK' }, branding: { name: 'føtex' }, run_till: '2026-12-01T00:00:00+0000' },
+    ]);
+    const picked = pickOffers(offers, 'milk', 'mælk', now);
+    expect(picked.map((o) => o.id)).toEqual(['c']);
+    expect(picked[0].prePrice).toBe(14);
+  });
+  it('ranks stores by how much of the list they cover', () => {
+    const o = (store: string) => ({ id: store, heading: 'x', price: 1, currency: 'DKK', store });
+    expect(storeCoverage({ a: [o('Netto'), o('Lidl')], b: [o('Netto')], c: [] })[0]).toEqual({ store: 'Netto', items: 2 });
+    expect(formatPrice(39, 'DKK')).toBe('39 kr.');
+    expect(formatPrice(29.95, 'DKK')).toBe('29,95 kr.');
   });
 });

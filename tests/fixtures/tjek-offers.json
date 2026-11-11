@@ -1,0 +1,518 @@
+[
+ {
+  "id": "g2XC9BH4Ut2q8W6-UFAgL",
+  "heading": "DANISH CROWN Hakket oksekød med 35 % grøntsager",
+  "description": "400 g / pk. Pr. kg 74,88",
+  "pricing": {
+   "price": 29.95,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 400,
+    "to": 400
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-05-02T22:00:00+0000",
+  "run_till": "2026-12-31T22:59:59+0000",
+  "catalog_id": "Xu-iwtQf",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FXu-iwtQf%2Fp-replacement-4RtR0Wy7-25.webp&w=300&x1r=0.5&x2r=0.98&y1r=0.03&y2r=0.26&s=b1b320bc23667f4d47f2298a555e37b8"
+  },
+  "branding": {
+   "name": "Lidl",
+   "color": "0347a1"
+  },
+  "dealer": {
+   "name": "Lidl",
+   "website": "https://www.lidl.dk/"
+  }
+ },
+ {
+  "id": "IK62WBKvbzqeyQ8_cIagf",
+  "heading": "Coop hakket okse/grønt, hakket gris & kalv 4-7% eller hakket kylling 3-6%",
+  "description": "400 g. Kg-pris 62,50. 1 pakke",
+  "pricing": {
+   "price": 25,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 400,
+    "to": 400
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-11-11T23:00:00+0000",
+  "run_till": "2026-11-18T22:59:59+0000",
+  "catalog_id": "lRMRVepF",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2Fbusiness_images%2FDWZE1w%2F3bc9b71a226889856e97dc794f29e3ff&w=300&s=abf6f4b15e7d557fe8ee1c2f7eaa9a51"
+  },
+  "branding": {
+   "name": "365discount",
+   "color": "01AA46"
+  },
+  "dealer": {
+   "name": "365discount",
+   "website": "https://365discount.coop.dk"
+  }
+ },
+ {
+  "id": "ZhjHMarXvSGwX9wfFDi6O",
+  "heading": "MADVÆRKET Hakket oksekød",
+  "description": "8-12 % fedt. 350 g. Pr. kg 82,86 Maks. 3 stk. pr. kunde pr. dag.",
+  "pricing": {
+   "price": 29,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 350,
+    "to": 350
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": 3
+   }
+  },
+  "run_from": "2026-11-07T23:00:00+0000",
+  "run_till": "2026-11-14T22:59:59+0000",
+  "catalog_id": "3Qh1PT2s",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3Qh1PT2s%2Fp-replacement-Cfdo9Fm0-1.webp&w=300&x1r=0.34&x2r=0.67&y1r=0.51&y2r=0.72&s=3fc40f486adf517191e6de3a937d02b2"
+  },
+  "branding": {
+   "name": "Lidl",
+   "color": "0347a1"
+  },
+  "dealer": {
+   "name": "Lidl",
+   "website": "https://www.lidl.dk/"
+  }
+ },
+ {
+  "id": "MdSsQIgEgwOX0CkllliLt",
+  "heading": "MADVÆRKET Hakket oksekød",
+  "description": "14-18 % fedt. 800 g / pk. Pr. kg 91,19",
+  "pricing": {
+   "price": 72.95,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 800,
+    "to": 800
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-05-02T22:00:00+0000",
+  "run_till": "2026-12-31T22:59:59+0000",
+  "catalog_id": "Xu-iwtQf",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FXu-iwtQf%2Fp-replacement-4RtR0Wy7-25.webp&w=300&x1r=0.5&x2r=0.98&y1r=0.71&y2r=0.95&s=79f1f0a1e8589840966403dc398d2549"
+  },
+  "branding": {
+   "name": "Lidl",
+   "color": "0347a1"
+  },
+  "dealer": {
+   "name": "Lidl",
+   "website": "https://www.lidl.dk/"
+  }
+ },
+ {
+  "id": "Gb3c7BP3bn9yHITORHNCX",
+  "heading": "Netto hakket oksekød 4-7%",
+  "description": "350 g. Pr. kg 111,43",
+  "pricing": {
+   "price": 39,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 350,
+    "to": 350
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-11-06T23:00:00+0000",
+  "run_till": "2026-11-13T22:59:59+0000",
+  "catalog_id": "rP8uM8Or",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FrP8uM8Or%2Fp-replacement-qgPo5-qY-9.webp&w=300&x1r=0.51&x2r=0.98&y1r=0.42&y2r=0.68&s=edc79f79b17dfa16d9131fadc912975e"
+  },
+  "branding": {
+   "name": "Netto",
+   "color": "FFD950"
+  },
+  "dealer": {
+   "name": "Netto",
+   "website": "https://netto.dk/"
+  }
+ },
+ {
+  "id": "dmXV1YXCFcEIGNr0oFA8x",
+  "heading": "Hakket okse- eller grise/kalvekød",
+  "description": "600-850 g. 4-7% fedt. Pr. kg max. 108,33",
+  "pricing": {
+   "price": 65,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 600,
+    "to": 850
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-10-29T23:00:00+0000",
+  "run_till": "2026-11-12T22:59:59+0000",
+  "catalog_id": "u3fOXiXJ",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2Fu3fOXiXJ%2Fp-replacement-LKSjGV5h-1.webp&w=300&x1r=0.25&x2r=0.94&y1r=0.31&y2r=0.62&s=dc8d12c90fced962ba010ed7d2451dff"
+  },
+  "branding": {
+   "name": "føtex",
+   "color": "1d2f54"
+  },
+  "dealer": {
+   "name": "føtex",
+   "website": "http://foetex.dk/"
+  }
+ },
+ {
+  "id": "FABGhwPzspKVNffIC2XEW",
+  "heading": "REMA 1000 Hakket dansk oksekød 4-7% eller kalveret med grønt",
+  "description": "350-400 g\nMax. 111.43 pr. kg",
+  "pricing": {
+   "price": 39,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 350,
+    "to": 400
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-11-07T23:00:00+0000",
+  "run_till": "2026-11-14T22:59:59+0000",
+  "catalog_id": "r_4Mhd0z",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2Fr_4Mhd0z%2Fp-2.webp&w=300&x1r=0.51&x2r=0.97&y1r=0.48&y2r=0.73&s=cf018627dc5f4e225aca6461fb385024"
+  },
+  "branding": {
+   "name": "REMA 1000",
+   "color": "014693"
+  },
+  "dealer": {
+   "name": "REMA 1000",
+   "website": "https://rema1000.dk/"
+  }
+ },
+ {
+  "id": "Al7HfNfX5bNuAEA2FMJWc",
+  "heading": "Coop entrecote, ribeye eller hakket oksekød 8-12% ",
+  "description": "400-1000 g. Kg-pris maks. 247,50. 1 pakke",
+  "pricing": {
+   "price": 99,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 400,
+    "to": 1000
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-11-04T23:00:00+0000",
+  "run_till": "2026-11-11T22:59:59+0000",
+  "catalog_id": "NZ6IiwsU",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2Fbusiness_images%2FDWZE1w%2Fe1df46162a00e9b9cde5fd8c14647522&w=300&s=d94b8d303075a0a43020bca9bff53da1"
+  },
+  "branding": {
+   "name": "365discount",
+   "color": "01AA46"
+  },
+  "dealer": {
+   "name": "365discount",
+   "website": "https://365discount.coop.dk"
+  }
+ },
+ {
+  "id": "_rLvigJbC-VP5U3OxI0Rc",
+  "heading": "MADVÆRKET Hakket oksekød",
+  "description": "4-7 % fedt. 400 g / pk. Pr. kg 112,38",
+  "pricing": {
+   "price": 44.95,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 400,
+    "to": 400
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-05-02T22:00:00+0000",
+  "run_till": "2026-12-31T22:59:59+0000",
+  "catalog_id": "Xu-iwtQf",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FXu-iwtQf%2Fp-replacement-4RtR0Wy7-25.webp&w=300&x1r=0.02&x2r=0.49&y1r=0.19&y2r=0.46&s=232d2b6c8a4dc52b26bbd68e47c7b6c6"
+  },
+  "branding": {
+   "name": "Lidl",
+   "color": "0347a1"
+  },
+  "dealer": {
+   "name": "Lidl",
+   "website": "https://www.lidl.dk/"
+  }
+ },
+ {
+  "id": "wjTSHAKhwVwSo-fK6Qiua",
+  "heading": "Coop hakket oksekød 5-8% eller Rose kyllingbrystfilet med lage",
+  "description": "700 g. 1200 g. 700-1200 g. Kg-pris maks. 112,86. 1 pakke.",
+  "pricing": {
+   "price": 79,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 700,
+    "to": 1200
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-10-31T23:00:00+0000",
+  "run_till": "2026-11-30T22:59:59+0000",
+  "catalog_id": "XpwnG_MO",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FXpwnG_MO%2Fp-replacement-H10lhtiZ-12.webp&w=300&x1r=0.51&x2r=0.95&y1r=0.415&y2r=0.675&s=ddae24c4ba558b3511b2427033c112a5"
+  },
+  "branding": {
+   "name": "Kvickly",
+   "color": "c31314"
+  },
+  "dealer": {
+   "name": "Kvickly",
+   "website": "http://kvickly.dk"
+  }
+ },
+ {
+  "id": "g7jDGLL2FKxDSBPz0ekdn",
+  "heading": "Flæsk i skiver, koteletter eller hakket okse- og grisekød 8-12%",
+  "description": "SPOT\n1000 G\n750 G\n1000 G\n750-1000 g.\nPr. kg max. 65,33",
+  "pricing": {
+   "price": 49,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 750,
+    "to": 1000
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-11-13T23:00:00+0000",
+  "run_till": "2026-11-20T22:59:59+0000",
+  "catalog_id": "40K-WXWp",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F40K-WXWp%2Fp-replacement-48kQSTkN-8.webp&w=300&x1r=0.01&x2r=0.6&y1r=0.37&y2r=0.68&s=1796f484e062f212acee69d327486889"
+  },
+  "branding": {
+   "name": "Netto",
+   "color": "FFD950"
+  },
+  "dealer": {
+   "name": "Netto",
+   "website": "https://netto.dk/"
+  }
+ },
+ {
+  "id": "BSkiYjkaL1Rn3cPuAbxlk",
+  "heading": "MADVÆRKET Hakket oksekød",
+  "description": "8-12 % fedt. 800 g / pk. Pr. kg 96,19",
+  "pricing": {
+   "price": 76.95,
+   "pre_price": null,
+   "currency": "DKK"
+  },
+  "quantity": {
+   "unit": {
+    "symbol": "g",
+    "si": {
+     "symbol": "kg",
+     "factor": 0.001
+    }
+   },
+   "size": {
+    "from": 800,
+    "to": 800
+   },
+   "pieces": {
+    "from": 1,
+    "to": 1,
+    "min": null,
+    "max": null
+   }
+  },
+  "run_from": "2026-05-02T22:00:00+0000",
+  "run_till": "2026-12-31T22:59:59+0000",
+  "catalog_id": "Xu-iwtQf",
+  "images": {
+   "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FXu-iwtQf%2Fp-replacement-4RtR0Wy7-25.webp&w=300&x1r=0.02&x2r=0.49&y1r=0.71&y2r=0.95&s=e0be45ca0a6305590de9ec7e16793dd1"
+  },
+  "branding": {
+   "name": "Lidl",
+   "color": "0347a1"
+  },
+  "dealer": {
+   "name": "Lidl",
+   "website": "https://www.lidl.dk/"
+  }
+ }
+]

@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.thurmer.skanu",
+      "bundleIdentifier": "app.skanu.recipes",
       "infoPlist": {
         "NSCameraUsageDescription": "Skanu uses the camera to photograph recipes and dishes.",
         "NSPhotoLibraryUsageDescription": "Skanu reads photos you choose so you can attach them to recipes.",
@@ -17,7 +17,7 @@
       }
     },
     "android": {
-      "package": "com.thurmer.skanu",
+      "package": "app.skanu.recipes",
       "adaptiveIcon": {
         "backgroundColor": "#D9480F",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

@@ -328,11 +328,13 @@ export function Check({
   sub,
   strike,
   right,
+  subColor,
 }: {
   checked: boolean;
   onPress: () => void;
   label: string;
   sub?: string;
+  subColor?: string;
   strike?: boolean;
   right?: React.ReactNode;
 }) {
@@ -368,7 +370,11 @@ export function Check({
             }}>
             {label}
           </Text>
-          {sub ? <Txt v="small">{sub}</Txt> : null}
+          {sub ? (
+            <Txt v="small" color={subColor}>
+              {sub}
+            </Txt>
+          ) : null}
         </View>
       </Pressable>
       {right}

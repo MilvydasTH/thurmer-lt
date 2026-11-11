@@ -19,18 +19,20 @@ function timeoutSignal(ms: number): AbortSignal {
 export interface ServerStatus {
   reachable: boolean;
   ai: boolean;
+  /** Store offers are set up on the server. */
+  offers: boolean;
 }
 
 let statusCache: { at: number; value: ServerStatus } | undefined;
 
 export async function getServerStatus(force = false): Promise<ServerStatus> {
   if (!force && statusCache && Date.now() - statusCache.at < 60_000) return statusCache.value;
-  let value: ServerStatus = { reachable: false, ai: false };
+  let value: ServerStatus = { reachable: false, ai: false, offers: false };
   try {
     const res = await fetch(`${BASE}/api/status`, { signal: timeoutSignal(6000) });
     if (res.ok) {
-      const j = (await res.json()) as { ai?: boolean };
-      value = { reachable: true, ai: !!j.ai };
+      const j = (await res.json()) as { ai?: boolean; offers?: boolean };
+      value = { reachable: true, ai: !!j.ai, offers: !!j.offers };
     }
   } catch {
     /* offline or no server configured */
@@ -38,6 +40,8 @@ export async function getServerStatus(force = false): Promise<ServerStatus> {
   statusCache = { at: Date.now(), value };
   return value;
 }
+
+export const apiPost = post;
 
 async function post<T>(path: string, body: unknown, timeoutMs = 90_000): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {

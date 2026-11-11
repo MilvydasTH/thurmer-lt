@@ -16,7 +16,8 @@ Built with Expo (React Native) and Expo Router. One codebase for all three platf
 | Social links | Instagram, TikTok, YouTube, Pinterest and Facebook links are read from the post's caption. See [limits](#known-limits). |
 | Cookbooks | Your own collections, plus favourites, meal types and tags. Search covers titles, tags and ingredients. |
 | Servings and units | Scale any recipe. Switch between the recipe as written, metric (grams, ml or dl) and US cups. Cups of flour, sugar and similar become grams; oven temperatures convert too. |
-| Grocery list | Add a recipe's ingredients, or a whole planned week. Duplicates merge ("1 onion" + "2 onions"). View by aisle or by recipe. Pantry staples you always have are left out. |
+| Shopping cart | Add a recipe to the cart with one button, or a whole planned week. The cart shows which recipes are in it and everything you need to buy. Duplicates merge ("1 onion" + "2 onions"). View by aisle or by recipe. Pantry staples you always have are left out. Removing a recipe removes its ingredients. |
+| Store offers (Denmark) | For each item still to buy, the cart shows the cheapest current leaflet offer per store, compared per kilo or litre, and which stores cover most of the list. Ingredients are looked up under their Danish name, so English and Lithuanian recipes work too. Needs a Tjek API key, see below. |
 | Meal plan | Week view with breakfast, lunch, dinner and snack, and one button to send the week to the grocery list. |
 | Nutrition | Calories, protein, carbs and fat per serving, estimated from a built-in food table that understands ingredient names in all three languages. It says which ingredients it could not count. |
 | Cook mode | One step at a time in large type, screen kept awake, timers picked out of the step text. |
@@ -47,7 +48,7 @@ npx eas-cli@latest build --profile development --platform ios   # or android
 ```
 
 `eas.json` has `development`, `preview` and `production` profiles. Publishing to the App Store
-needs an Apple Developer account; the bundle identifier is set to `com.thurmer.skanu` in
+needs an Apple Developer account; the bundle identifier is set to `app.skanu.recipes` in
 `app.json` and can be changed there.
 
 ## The server part
@@ -58,7 +59,8 @@ phone or browser cannot do alone:
 - `POST /api/import` fetches a page for link import (browsers are not allowed to read other
   sites; phones fetch recipe sites directly and only ask the server for social links).
 - `POST /api/ai` reads recipes from photos and unstructured text, and translates recipes.
-- `GET /api/status` tells the app whether AI is available.
+- `POST /api/offers` looks up current Danish store offers for the items in the cart.
+- `GET /api/status` tells the app whether AI and offers are available.
 
 They are Expo Router API routes in `src/app/api`. In development they run inside `npm start`.
 To deploy the web app and the routes together:
@@ -69,6 +71,18 @@ npx eas-cli@latest deploy      # EAS Hosting; any Node host that runs `expo serv
 ```
 
 Then set `EXPO_PUBLIC_API_URL` to that deployment's address when building the phone apps.
+
+### Store offers
+
+Offers come from [Tjek](https://tjek.com) (the service behind eTilbudsavis), which carries the
+leaflets of Netto, REMA 1000, Lidl, føtex, Bilka, Coop and others. Create an app in the Tjek CMS
+to get an API key and set it as `TJEK_API_KEY` on the server. The key stays on the server; the app
+calls `POST /api/offers`. Without a key the cart says offers are not set up. Check Tjek's terms
+for your use before publishing the app.
+
+minetilbud.dk was the first choice but cannot be connected: its website publishes whole leaflets
+only, and the product-level offers live in its mobile app's private service. A partnership with
+its operator, FK Distribution, would be the way in.
 
 ### AI features
 

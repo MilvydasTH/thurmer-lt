@@ -150,6 +150,8 @@ export interface Food {
   fat: number;
   gPerCup: number;
   gPerPiece: number;
+  /** Everyday Danish name, used to look the food up in Danish stores. */
+  da: string;
 }
 
 interface Matcher {
@@ -173,14 +175,20 @@ function aliasToRegExp(alias: string): RegExp {
 }
 
 const MATCHERS: Matcher[] = [];
+const BY_FOOD = new Map<string, RegExp[]>();
 for (const r of ROWS) {
   const food: Food = {
     id: r[0], aisle: r[1], kcal: r[2], protein: r[3], carbs: r[4], fat: r[5], gPerCup: r[6], gPerPiece: r[7],
+    da: r[9].split('|')[0],
   };
+  const own: RegExp[] = [];
+  BY_FOOD.set(food.id, own);
   for (const aliases of [r[8], r[9], r[10]]) {
     for (const alias of aliases.split('|')) {
       if (!alias) continue;
-      MATCHERS.push({ food, re: aliasToRegExp(alias), weight: alias.replace(/\*/g, '').length });
+      const re = aliasToRegExp(alias);
+      MATCHERS.push({ food, re, weight: alias.replace(/\*/g, '').length });
+      own.push(re);
     }
   }
 }
@@ -208,4 +216,10 @@ export function matchFood(name: string): Food | undefined {
 
 export function aisleFor(name: string): Aisle {
   return matchFood(name)?.aisle ?? 'other';
+}
+
+/** True when the text names this food under any of its aliases, even if a longer food name is also present. */
+export function mentionsFood(text: string, foodId: string): boolean {
+  const key = text.toLowerCase().replace(/\s+/g, ' ');
+  return (BY_FOOD.get(foodId) ?? []).some((re) => re.test(key));
 }

@@ -170,4 +170,6 @@ export interface Settings {
   pantry: string[];
   groceryView: 'aisle' | 'recipe';
   store: string;
+  /** Look up current leaflet offers from Danish stores for the items in the cart. */
+  offers: boolean;
 }
