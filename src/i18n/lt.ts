@@ -292,4 +292,6 @@ export const lt: Dict = {
   crash_title: 'Kažkas nepavyko',
   crash_body: 'Jūsų receptai saugūs šiame įrenginyje. Bandykite dar kartą; jei klaida kartojasi, paleiskite programėlę iš naujo.',
   crash_retry: 'Bandyti dar kartą',
+  quick_link: 'Nuoroda',
+  quick_write: 'Rašyti',
 };

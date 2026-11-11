@@ -292,4 +292,6 @@ export const da: Dict = {
   crash_title: 'Noget gik galt',
   crash_body: 'Dine opskrifter ligger sikkert på enheden. Prøv igen, og genstart appen, hvis det bliver ved.',
   crash_retry: 'Prøv igen',
+  quick_link: 'Link / video',
+  quick_write: 'Skriv',
 };

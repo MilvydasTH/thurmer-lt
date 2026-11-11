@@ -12,9 +12,16 @@ page.on('pageerror', (e) => errors.push(String(e)));
 
 let failed = 0;
 const text = () => page.locator('body').innerText();
-const expectText = async (needle) => {
-  // Section labels are upper-cased by styling, so compare without regard to case.
-  if (!(await text()).toLowerCase().includes(needle.toLowerCase())) throw new Error(`expected to see "${needle}"`);
+// Polls for a few seconds: the dev server compiles each screen the first time it is opened.
+const expectText = async (needle, timeoutMs = 10_000) => {
+  const want = needle.toLowerCase();
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    // Section labels are upper-cased by styling, so compare without regard to case.
+    if ((await text()).toLowerCase().includes(want)) return;
+    if (Date.now() > deadline) throw new Error(`expected to see "${needle}"`);
+    await page.waitForTimeout(250);
+  }
 };
 const step = async (name, fn) => {
   try {

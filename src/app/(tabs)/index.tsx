@@ -1,16 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, TextInput, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AddRecipeSheet, RecipeCard, matchesQuery } from '@/components/recipe-bits';
-import { Btn, Chip, Empty, Header, IconBtn, Screen } from '@/components/ui';
+import { Btn, Chip, Empty, Header, IconBtn, Screen, Txt } from '@/components/ui';
 import { useT, type Key } from '@/i18n';
 import { MEAL_TYPES, type MealType, type Recipe } from '@/lib/types';
 import { useStore } from '@/store';
 import { MAX_WIDTH, radius, space, useColors } from '@/theme';
 
 type Filter = 'all' | 'favorites' | MealType;
+
+const QUICK_ADD: { key: string; mode?: 'link' | 'text' | 'photo'; icon: React.ComponentProps<typeof Ionicons>['name']; label: Key; a11y: Key }[] = [
+  { key: 'link', mode: 'link', icon: 'link', label: 'quick_link', a11y: 'add_from_link' },
+  { key: 'text', mode: 'text', icon: 'clipboard-outline', label: 'import_tab_text', a11y: 'add_from_text' },
+  { key: 'photo', mode: 'photo', icon: 'camera-outline', label: 'import_tab_photo', a11y: 'add_from_photo' },
+  { key: 'write', icon: 'create-outline', label: 'quick_write', a11y: 'add_manual' },
+];
 
 export default function RecipesScreen() {
   const t = useT();
@@ -90,6 +98,40 @@ export default function RecipesScreen() {
         contentContainerStyle={{ padding: space.lg, paddingTop: space.sm, gap: space.md, paddingBottom: insets.bottom + 96 }}
         keyboardShouldPersistTaps="handled"
         renderItem={({ item }) => (item ? <RecipeCard recipe={item} /> : <View style={{ flex: 1 }} />)}
+        ListHeaderComponent={
+          // The ways to add a recipe, always in view at the top of the list rather than behind the + button.
+          <View style={{ gap: space.sm }}>
+            <Txt v="label">{t('add_recipe')}</Txt>
+            <View style={{ flexDirection: 'row', gap: space.sm }}>
+              {QUICK_ADD.map((q) => (
+                <Pressable
+                  key={q.key}
+                  onPress={() => {
+                    if (q.mode) return router.push({ pathname: '/import', params: { mode: q.mode } });
+                    useStore.getState().setDraft(null);
+                    router.push('/recipe/edit');
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(q.a11y)}
+                  testID={`quick-${q.key}`}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    alignItems: 'center',
+                    gap: 6,
+                    paddingVertical: space.md,
+                    borderRadius: radius.lg,
+                    backgroundColor: c.primarySoft,
+                    opacity: pressed ? 0.7 : 1,
+                  })}>
+                  <Ionicons name={q.icon} size={24} color={c.primary} />
+                  <Txt v="small" color={c.text} numberOfLines={1} style={{ fontWeight: '700' }}>
+                    {t(q.label)}
+                  </Txt>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        }
         ListEmptyComponent={
           recipes.length === 0 ? (
             <Empty icon="restaurant-outline" title={t('recipes_empty_title')} body={t('recipes_empty_body')}>

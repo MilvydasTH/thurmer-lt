@@ -302,4 +302,6 @@ export const en = {
   crash_title: 'Something went wrong',
   crash_body: 'Your recipes are safe on this device. Try again, and if it keeps happening, restart the app.',
   crash_retry: 'Try again',
+  quick_link: 'Link / video',
+  quick_write: 'Write',
 };
