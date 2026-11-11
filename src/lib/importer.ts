@@ -265,7 +265,7 @@ export function unwrapSocialCaption(desc: string): string {
 
 export type ImportResult =
   | { ok: true; draft: RecipeDraft; via: 'structured' | 'caption' | 'ai'; partial?: boolean }
-  | { ok: false; reason: 'fetch' | 'blocked' | 'norecipe'; summary?: PageSummary };
+  | { ok: false; reason: 'fetch' | 'blocked' | 'norecipe' | 'busy'; summary?: PageSummary };
 
 /**
  * No-AI import pipeline for a fetched page: structured data first, then the page's

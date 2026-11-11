@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { dayLabel, useLang, useT, type Key } from '@/i18n';
@@ -30,9 +30,12 @@ export function GroceryAddSheet({
   const items = useMemo(() => recipe.ingredients.filter((i) => !i.header), [recipe.ingredients]);
   const [picked, setPicked] = useState<string[]>([]);
 
-  useEffect(() => {
+  // Start each opening from the default selection: everything except pantry staples.
+  const [wasVisible, setWasVisible] = useState(false);
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
     if (visible) setPicked(items.filter((i) => !isPantryItem(i.name, settings.pantry)).map((i) => i.id));
-  }, [visible, items, settings.pantry]);
+  }
 
   const add = () => {
     addGroceries(items.filter((i) => picked.includes(i.id)).map((i) => ingredientToGrocery(i, scale, recipe)));
@@ -127,12 +130,15 @@ export function CookbookFormSheet({
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState(EMOJIS[0]);
 
-  useEffect(() => {
+  // Fill the form from the cookbook being renamed (or blank for a new one) each time it opens.
+  const [wasVisible, setWasVisible] = useState(false);
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
     if (visible) {
       setName(existing?.name ?? '');
       setEmoji(existing?.emoji ?? EMOJIS[0]);
     }
-  }, [visible, existing]);
+  }
 
   const save = () => {
     if (!name.trim()) return;

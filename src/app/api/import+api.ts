@@ -1,6 +1,7 @@
 import { importFromHtml, isSocialUrl, unwrapSocialCaption, type ImportResult } from '@/lib/importer';
 import { aiAvailable, aiErrorCode, extractRecipeFromText } from '@/server/ai';
 import { FetchError, fetchPage } from '@/server/fetchPage';
+import { tooMany } from '@/server/rateLimit';
 
 type Body = { url?: unknown };
 
@@ -9,6 +10,8 @@ type Body = { url?: unknown };
  * Structured recipe data is used when the page has it; AI only fills in when it does not.
  */
 export async function POST(request: Request) {
+  const limited = tooMany(request, 'import', 30);
+  if (limited) return limited;
   let body: Body;
   try {
     body = (await request.json()) as Body;

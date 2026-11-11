@@ -285,4 +285,11 @@ export const lt: Dict = {
   settings_offers: 'Danijos parduotuvių akcijos',
   settings_offers_help: 'Tikrina Danijos prekybos centrų leidinius ir ieško krepšelyje esančių prekių. Prekių pavadinimai siunčiami akcijų paslaugai.',
   offers_unconfigured: 'Akcijos dar neįjungtos: serveriui reikia „Tjek“ API rakto.',
+  import_err_busy: 'Per daug importų per trumpą laiką. Palaukite minutę ir bandykite dar kartą.',
+  offers_nearby: 'Tik netoliese esančios parduotuvės',
+  offers_nearby_help: 'Naudoja apytikslę jūsų vietą, suapvalintą maždaug iki kilometro, ir rodo parduotuvių iki 15 km atstumu akcijas.',
+  offers_nearby_denied: 'Prieiga prie vietos išjungta, todėl rodomos visos šalies akcijos.',
+  crash_title: 'Kažkas nepavyko',
+  crash_body: 'Jūsų receptai saugūs šiame įrenginyje. Bandykite dar kartą; jei klaida kartojasi, paleiskite programėlę iš naujo.',
+  crash_retry: 'Bandyti dar kartą',
 };

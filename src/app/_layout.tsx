@@ -6,12 +6,24 @@ import React, { useEffect } from 'react';
 import { Platform, View } from 'react-native';
 
 import { IncomingShare } from '@/components/incoming-share';
-import { ConfirmHost, ToastHost } from '@/components/ui';
-import { detectLang } from '@/i18n';
+import { Btn, ConfirmHost, Empty, Screen, ToastHost } from '@/components/ui';
+import { detectLang, useT } from '@/i18n';
 import { useStore } from '@/store';
 import { useColors, useIsDark } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+/** Shown by the router instead of a blank screen when a screen throws. */
+export function ErrorBoundary({ retry }: { error: Error; retry: () => Promise<void> }) {
+  const t = useT();
+  return (
+    <Screen style={{ justifyContent: 'center' }}>
+      <Empty icon="alert-circle-outline" title={t('crash_title')} body={t('crash_body')}>
+        <Btn title={t('crash_retry')} onPress={() => retry()} />
+      </Empty>
+    </Screen>
+  );
+}
 
 export default function RootLayout() {
   const hydrated = useStore((s) => s.hydrated);

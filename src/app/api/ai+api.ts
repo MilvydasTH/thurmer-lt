@@ -1,3 +1,4 @@
+import { tooMany } from '@/server/rateLimit';
 import { aiAvailable, aiErrorCode, extractRecipeFromImage, extractRecipeFromText, translateRecipe } from '@/server/ai';
 
 type Body =
@@ -12,6 +13,9 @@ const isStrings = (v: unknown): v is string[] => Array.isArray(v) && v.every((x)
 
 export async function POST(request: Request) {
   if (!aiAvailable()) return Response.json({ ok: false, error: 'no_ai' }, { status: 503 });
+  // AI calls cost money: a tight per-minute limit and a daily ceiling per visitor.
+  const limited = tooMany(request, 'ai', 8) ?? tooMany(request, 'ai-day', 150, 24 * 60 * 60_000);
+  if (limited) return limited;
   let body: Body;
   try {
     body = (await request.json()) as Body;

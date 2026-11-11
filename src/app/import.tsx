@@ -55,7 +55,8 @@ export default function ImportScreen() {
     setBusy(false);
     if (res.ok) return openEditor(res.draft, !!res.partial);
     if (res.reason === 'norecipe' && res.summary?.description) setCaption(unwrapSocialCaption(res.summary.description));
-    if (res.reason === 'blocked') setError('import_err_blocked');
+    if (res.reason === 'busy') setError('import_err_busy');
+    else if (res.reason === 'blocked') setError('import_err_blocked');
     else if (res.reason === 'fetch') setError(Platform.OS === 'web' && status && !status.reachable ? 'import_err_server' : 'import_err_fetch');
     else setError(res.ai === false ? 'import_err_norecipe_noai' : 'import_err_norecipe');
   };

@@ -7,6 +7,13 @@ import { offerQuery, parseOffers, pickOffers, type Offer } from '@/lib/offers';
 const ENDPOINT = 'https://squid-api.tjek.com/v2/offers/search';
 const TTL = 30 * 60_000;
 const MAX_ITEMS = 60;
+/** How far from the shopper a store may be when they ask for nearby offers only. */
+const NEAR_RADIUS_M = 15_000;
+
+export interface Near {
+  lat: number;
+  lng: number;
+}
 
 export function offersConfigured(): boolean {
   return !!process.env.TJEK_API_KEY;
@@ -14,17 +21,19 @@ export function offersConfigured(): boolean {
 
 const cache = new Map<string, { at: number; offers: Offer[] }>();
 
-async function search(query: string): Promise<Offer[]> {
-  const hit = cache.get(query);
+async function search(query: string, near?: Near): Promise<Offer[]> {
+  const where = near ? `&r_lat=${near.lat}&r_lng=${near.lng}&r_radius=${NEAR_RADIUS_M}` : '';
+  const cacheKey = `${query}|${where}`;
+  const hit = cache.get(cacheKey);
   if (hit && Date.now() - hit.at < TTL) return hit.offers;
-  const res = await fetch(`${ENDPOINT}?query=${encodeURIComponent(query)}&limit=40`, {
+  const res = await fetch(`${ENDPOINT}?query=${encodeURIComponent(query)}&limit=40${where}`, {
     headers: { accept: 'application/json', 'x-api-key': process.env.TJEK_API_KEY ?? '' },
     signal: AbortSignal.timeout(12_000),
   });
   if (!res.ok) throw new Error(`offers ${res.status}`);
   const offers = parseOffers(await res.json());
   if (cache.size > 500) cache.clear();
-  cache.set(query, { at: Date.now(), offers });
+  cache.set(cacheKey, { at: Date.now(), offers });
   return offers;
 }
 
@@ -36,7 +45,7 @@ export interface OfferLookup {
 }
 
 /** Looks up current offers for each item, a few at a time. */
-export async function findOffers(items: { key: string; name: string }[]): Promise<OfferLookup> {
+export async function findOffers(items: { key: string; name: string }[], near?: Near): Promise<OfferLookup> {
   const byItem: Record<string, Offer[]> = {};
   let failed = false;
   const queue = items.slice(0, MAX_ITEMS);
@@ -48,7 +57,7 @@ export async function findOffers(items: { key: string; name: string }[]): Promis
         continue;
       }
       try {
-        byItem[item.key] = pickOffers(await search(query), item.name, query, Date.now());
+        byItem[item.key] = pickOffers(await search(query, near), item.name, query, Date.now());
       } catch {
         failed = true;
       }

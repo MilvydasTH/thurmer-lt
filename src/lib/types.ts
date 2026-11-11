@@ -172,4 +172,6 @@ export interface Settings {
   store: string;
   /** Look up current leaflet offers from Danish stores for the items in the cart. */
   offers: boolean;
+  /** Limit offers to stores around the phone's rough position. */
+  offersNearby: boolean;
 }

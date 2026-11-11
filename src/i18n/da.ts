@@ -285,4 +285,11 @@ export const da: Dict = {
   settings_offers: 'Tilbud fra danske butikker',
   settings_offers_help: 'Tjekker danske supermarkeders tilbudsaviser for varerne i din kurv. Varenavnene sendes til tilbudstjenesten.',
   offers_unconfigured: 'Tilbud er ikke sat op endnu: serveren mangler en API-nøgle fra Tjek.',
+  import_err_busy: 'For mange importer på kort tid. Vent et minut, og prøv igen.',
+  offers_nearby: 'Kun butikker i nærheden',
+  offers_nearby_help: 'Bruger din omtrentlige placering, afrundet til cirka en kilometer, til at vise tilbud fra butikker inden for 15 km.',
+  offers_nearby_denied: 'Adgang til placering er slået fra, så tilbud vises for hele landet.',
+  crash_title: 'Noget gik galt',
+  crash_body: 'Dine opskrifter ligger sikkert på enheden. Prøv igen, og genstart appen, hvis det bliver ved.',
+  crash_retry: 'Prøv igen',
 };

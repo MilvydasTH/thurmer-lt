@@ -10,11 +10,11 @@ import { useColors } from '@/theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
-const icon =
-  (on: IconName, off: IconName) =>
-  ({ color, focused, size }: { color: ColorValue; focused: boolean; size: number }) => (
-    <Ionicons name={focused ? on : off} size={size} color={color as string} />
-  );
+function TabIcon({ on, off, color, focused, size }: { on: IconName; off: IconName; color: ColorValue; focused: boolean; size: number }) {
+  return <Ionicons name={focused ? on : off} size={size} color={color as string} />;
+}
+
+type IconProps = { color: ColorValue; focused: boolean; size: number };
 
 export default function TabsLayout() {
   const t = useT();
@@ -38,19 +38,19 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         sceneStyle: { backgroundColor: c.bg },
       }}>
-      <Tabs.Screen name="index" options={{ title: t('tab_recipes'), tabBarIcon: icon('restaurant', 'restaurant-outline') }} />
-      <Tabs.Screen name="cookbooks" options={{ title: t('tab_cookbooks'), tabBarIcon: icon('book', 'book-outline') }} />
-      <Tabs.Screen name="plan" options={{ title: t('tab_plan'), tabBarIcon: icon('calendar', 'calendar-outline') }} />
+      <Tabs.Screen name="index" options={{ title: t('tab_recipes'), tabBarIcon: (p: IconProps) => <TabIcon on="restaurant" off="restaurant-outline" {...p} /> }} />
+      <Tabs.Screen name="cookbooks" options={{ title: t('tab_cookbooks'), tabBarIcon: (p: IconProps) => <TabIcon on="book" off="book-outline" {...p} /> }} />
+      <Tabs.Screen name="plan" options={{ title: t('tab_plan'), tabBarIcon: (p: IconProps) => <TabIcon on="calendar" off="calendar-outline" {...p} /> }} />
       <Tabs.Screen
         name="groceries"
         options={{
           title: t('tab_groceries'),
-          tabBarIcon: icon('cart', 'cart-outline'),
+          tabBarIcon: (p: IconProps) => <TabIcon on="cart" off="cart-outline" {...p} />,
           tabBarBadge: left > 0 ? left : undefined,
           tabBarBadgeStyle: { backgroundColor: c.primary, color: c.onPrimary, fontSize: 11 },
         }}
       />
-      <Tabs.Screen name="settings" options={{ title: t('tab_settings'), tabBarIcon: icon('settings', 'settings-outline') }} />
+      <Tabs.Screen name="settings" options={{ title: t('tab_settings'), tabBarIcon: (p: IconProps) => <TabIcon on="settings" off="settings-outline" {...p} /> }} />
     </Tabs>
   );
 }

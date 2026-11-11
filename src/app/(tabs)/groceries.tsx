@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Btn, Card, Check, Empty, Header, IconBtn, MenuRow, Screen, Segmented, Sheet, Txt, confirm, toast } from '@/components/ui';
 import { useLang, useT, type Key, type TFn } from '@/i18n';
+import { approximatePlace } from '@/lib/location';
 import { itemLabel, manualGrocery, mergeGroceries, storesFor, type MergedItem } from '@/lib/grocery';
 import { formatPrice, startsLater, storeCoverage, type Offer } from '@/lib/offers';
 import { findOffers } from '@/lib/offersApi';
@@ -43,6 +44,7 @@ export default function CartScreen() {
   const useDl = useStore((s) => s.settings.useDl);
   const storeId = useStore((s) => s.settings.store);
   const offersOn = useStore((s) => s.settings.offers);
+  const nearby = useStore((s) => s.settings.offersNearby);
   const [line, setLine] = useState('');
   const [sheet, setSheet] = useState<null | 'menu' | 'order'>(null);
   const [offers, setOffers] = useState<Record<string, Offer[]>>({});
@@ -58,15 +60,14 @@ export default function CartScreen() {
   // Only look up what is still to buy, and only again when that set of items changes.
   const wanted = useMemo(() => left.map((m) => ({ key: m.key, name: m.name })), [left]);
   const wantedKey = wanted.map((w) => `${w.key}:${w.name}`).join('|');
+  const wantOffers = offersOn && wanted.length > 0;
   useEffect(() => {
-    if (!offersOn || wanted.length === 0) {
-      setOfferState('idle');
-      return;
-    }
+    if (!wantOffers) return;
     let live = true;
-    setOfferState('loading');
     const timer = setTimeout(async () => {
-      const res = await findOffers(wanted);
+      setOfferState('loading');
+      const near = nearby ? ((await approximatePlace()) ?? undefined) : undefined;
+      const res = await findOffers(wanted, near);
       if (!live) return;
       if (!res.ok) return setOfferState(res.error === 'not_configured' ? 'unconfigured' : 'failed');
       setOffers(res.byItem);
@@ -78,9 +79,10 @@ export default function CartScreen() {
     };
     // `wantedKey` stands in for `wanted`, which is a new array on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offersOn, wantedKey, refresh]);
+  }, [wantOffers, wantedKey, refresh, nearby]);
 
-  const now = Date.now();
+  // Read the clock once per visit: offer validity is by the day, so it does not need to tick.
+  const [now] = useState(() => Date.now());
   const onOffer = left.filter((m) => (offers[m.key]?.length ?? 0) > 0);
   const coverage = useMemo(() => {
     const live: Record<string, Offer[]> = {};

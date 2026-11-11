@@ -34,8 +34,10 @@ npm start          # then scan the QR code with Expo Go on a phone
 Checks:
 
 ```bash
-npm test           # unit tests for parsing, scaling, conversion, nutrition and import
+npm test           # unit tests: parsing, scaling, conversion, nutrition, import, offers, rate limits
 npm run typecheck
+npm run lint
+npm run test:e2e   # browser walkthrough of the main flows; run `npm run web` first
 ```
 
 ### On a phone
@@ -77,7 +79,8 @@ Then set `EXPO_PUBLIC_API_URL` to that deployment's address when building the ph
 Offers come from [Tjek](https://tjek.com) (the service behind eTilbudsavis), which carries the
 leaflets of Netto, REMA 1000, Lidl, føtex, Bilka, Coop and others. Create an app in the Tjek CMS
 to get an API key and set it as `TJEK_API_KEY` on the server. The key stays on the server; the app
-calls `POST /api/offers`. Without a key the cart says offers are not set up. Check Tjek's terms
+calls `POST /api/offers`. Without a key the cart says offers are not set up. "Only stores near me" in Settings limits
+offers to shops within 15 km, using a position rounded to about a kilometre. Check Tjek's terms
 for your use before publishing the app.
 
 minetilbud.dk was the first choice but cannot be connected: its website publishes whole leaflets
@@ -88,8 +91,9 @@ its operator, FK Distribution, would be the way in.
 
 Set `ANTHROPIC_API_KEY` on the server (see `.env.example`). Without it the app still works; the
 "read with AI", photo reading and translation controls simply do not appear. The key is only
-read by the server routes and is never part of the app bundle. The routes have size limits but
-no login, so put them behind your host's rate limiting before sharing the app widely.
+read by the server routes and is never part of the app bundle. The routes have size limits
+and a per-visitor rate limit (8 AI calls a minute, 150 a day), but no login. The limit is kept
+in memory per server instance, so on a host that runs many instances add the host's own limit too.
 
 ## Known limits
 
@@ -103,7 +107,8 @@ no login, so put them behind your host's rate limiting before sharing the app wi
   nemlig.com in Denmark). These stores offer no way for an app to fill a basket.
 - **Nutrition is an estimate** from about 110 common foods. Recipes that state their own
   nutrition keep the source's figures.
-- **Timers run while cook mode is open.** They do not notify you after the app is closed.
+- **Timer alerts need a real build.** On a phone a timer rings as a notification even when the
+  app is in the background; in a browser it only rings while cook mode is open.
 - Singular/plural fixes when scaling ("1 onion" → "2 onions") are done for English only; Danish
   and Lithuanian ingredient lines keep their wording and only the number changes.
 

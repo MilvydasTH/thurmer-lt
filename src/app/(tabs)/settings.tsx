@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Btn, Card, Chip, Field, Header, MenuRow, Screen, Segmented, Txt, confirm, toast } from '@/components/ui';
 import { LANGUAGES, useT } from '@/i18n';
 import { getServerStatus, type ServerStatus } from '@/lib/api';
+import { approximatePlace } from '@/lib/location';
 import { pickTextFile, saveTextFile } from '@/lib/platform';
 import { DEFAULT_PANTRY, useStore } from '@/store';
 import { space, useColors } from '@/theme';
@@ -143,6 +144,24 @@ export default function SettingsScreen() {
               value={settings.offers}
               onValueChange={(offers) => update({ offers })}
               accessibilityLabel={t('offers_enable')}
+              trackColor={{ true: c.accent, false: c.border }}
+            />
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+            <View style={{ flex: 1 }}>
+              <Txt v="h3">{t('offers_nearby')}</Txt>
+              <Txt v="small">{t('offers_nearby_help')}</Txt>
+            </View>
+            <Switch
+              value={settings.offersNearby}
+              disabled={!settings.offers}
+              onValueChange={async (on) => {
+                if (!on) return update({ offersNearby: false });
+                // Ask for the position at the moment the person opts in, so the prompt has a reason.
+                if (await approximatePlace()) update({ offersNearby: true });
+                else toast(t('offers_nearby_denied'));
+              }}
+              accessibilityLabel={t('offers_nearby')}
               trackColor={{ true: c.accent, false: c.border }}
             />
           </View>

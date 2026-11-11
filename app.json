@@ -52,7 +52,9 @@
           },
           "android": {
             "enabled": true,
-            "singleShareMimeTypes": ["text/plain"]
+            "singleShareMimeTypes": [
+              "text/plain"
+            ]
           }
         }
       ],
@@ -61,6 +63,13 @@
         {
           "photosPermission": "Skanu reads photos you choose so you can attach them to recipes.",
           "cameraPermission": "Skanu uses the camera to photograph recipes and dishes."
+        }
+      ],
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Skanu uses your approximate location to show grocery offers from stores near you."
         }
       ]
     ],

@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS: Settings = {
   groceryView: 'aisle',
   store: 'auto',
   offers: false,
+  offersNearby: false,
 };
 
 export const DEFAULT_PANTRY: Record<Lang, string[]> = {

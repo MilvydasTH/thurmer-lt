@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Btn, Empty, Header, IconBtn, Screen, Sheet, Txt, toast } from '@/components/ui';
 import { useLang, useT } from '@/i18n';
 import { convertTemperatures, displayIngredient } from '@/lib/convert';
+import { cancelTimerAlert, scheduleTimerAlert } from '@/lib/notify';
 import { findTimers, formatClock } from '@/lib/timers';
 import type { Lang, UnitSystem } from '@/lib/types';
 import { parseIngredient } from '@/lib/units';
@@ -22,7 +23,11 @@ interface RunningTimer {
   endsAt: number;
   total: number;
   done: boolean;
+  /** Id of the phone notification that rings if the app is not in front when the timer ends. */
+  alertId?: string;
 }
+
+const clock = () => Date.now();
 
 const WAKE_TAG = 'skanu-cook';
 
@@ -41,7 +46,9 @@ export default function CookScreen() {
   const [now, setNow] = useState(() => Date.now());
   const [finished, setFinished] = useState(false);
   const timersRef = useRef(timers);
-  timersRef.current = timers;
+  useEffect(() => {
+    timersRef.current = timers;
+  }, [timers]);
 
   // Keep the screen on while cooking; the reason this screen exists.
   useEffect(() => {
@@ -98,9 +105,13 @@ export default function CookScreen() {
   const close = () => (router.canGoBack() ? router.back() : router.replace(`/recipe/${recipe.id}`));
 
   const start = (label: string, seconds: number) => {
-    const ts = Date.now();
+    const ts = clock();
+    const id = `${ts}-${timers.length}`;
     setNow(ts);
-    setTimers((list) => [...list, { id: `${ts}-${list.length}`, label, step: index, endsAt: ts + seconds * 1000, total: seconds, done: false }]);
+    setTimers((list) => [...list, { id, label, step: index, endsAt: ts + seconds * 1000, total: seconds, done: false }]);
+    scheduleTimerAlert(t('cook_timer_done'), `${translation?.title || recipe.title} · ${label}`, seconds).then((alertId) => {
+      if (alertId) setTimers((list) => list.map((x) => (x.id === id ? { ...x, alertId } : x)));
+    });
   };
 
   if (finished) {
@@ -152,7 +163,10 @@ export default function CookScreen() {
             return (
               <Pressable
                 key={tm.id}
-                onPress={() => setTimers((list) => list.filter((x) => x.id !== tm.id))}
+                onPress={() => {
+                  if (!tm.done) cancelTimerAlert(tm.alertId);
+                  setTimers((list) => list.filter((x) => x.id !== tm.id));
+                }}
                 accessibilityRole="button"
                 accessibilityLabel={`${tm.label} ${tm.done ? t('cook_timer_done') : formatClock(left)}. ${t('remove')}`}
                 style={{

@@ -295,4 +295,11 @@ export const en = {
   settings_offers: 'Offers from Danish stores',
   settings_offers_help: 'Checks the weekly leaflets of Danish supermarkets for the items in your cart. The item names are sent to the offers service.',
   offers_unconfigured: 'Offers are not set up yet: the server needs an API key from Tjek.',
+  import_err_busy: 'Too many imports in a short time. Wait a minute and try again.',
+  offers_nearby: 'Only stores near me',
+  offers_nearby_help: 'Uses your rough location, rounded to about a kilometre, to show offers from shops within 15 km.',
+  offers_nearby_denied: 'Location access is off, so offers stay country-wide.',
+  crash_title: 'Something went wrong',
+  crash_body: 'Your recipes are safe on this device. Try again, and if it keeps happening, restart the app.',
+  crash_retry: 'Try again',
 };
