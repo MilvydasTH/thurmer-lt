@@ -22,6 +22,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { create } from 'zustand';
 
+import { imageSource } from '@/data/sampleImages';
 import { MAX_WIDTH, radius, space, tintFor, useColors, useIsDark } from '@/theme';
 
 export type IconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -498,7 +499,7 @@ export function RecipeImage({
     return (
       <View style={[{ overflow: 'hidden', backgroundColor: tintFor(title, dark) }, style]}>
         <Image
-          source={{ uri }}
+          source={imageSource(uri)}
           style={{ width: '100%', height: '100%' }}
           contentFit="cover"
           transition={150}

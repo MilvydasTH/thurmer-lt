@@ -31,9 +31,9 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: c.card,
           borderTopColor: c.border,
-          height: 60 + insets.bottom,
+          height: 66 + insets.bottom,
           paddingTop: 6,
-          paddingBottom: insets.bottom + 8,
+          paddingBottom: insets.bottom + 6,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         sceneStyle: { backgroundColor: c.bg },

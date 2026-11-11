@@ -1,7 +1,9 @@
 import type { Lang, RecipeDraft } from '@/lib/types';
 
+import { SAMPLE_IMAGE_KEYS } from './sampleImages';
+
 /** Starter recipes so a new library is not empty. Written for this app, one set per language. */
-export const SAMPLES: Record<Lang, RecipeDraft[]> = {
+const TEXTS: Record<Lang, RecipeDraft[]> = {
   en: [
     {
       title: 'Cold beetroot soup (šaltibarščiai)',
@@ -60,26 +62,27 @@ export const SAMPLES: Record<Lang, RecipeDraft[]> = {
       cuisine: 'Danish',
     },
     {
-      title: 'One-pan tomato pasta',
+      title: 'One-pan creamy tomato pasta',
       description: 'Everything cooks together, so the starch from the pasta thickens the sauce.',
       lang: 'en',
       servings: 2,
       prepMin: 5,
       cookMin: 15,
       ingredients: [
-        '200 g spaghetti',
+        '200 g penne',
         '1 can chopped tomatoes',
         '2 cloves garlic',
         '2 tbsp olive oil',
         '4 dl water',
+        '1 dl cream',
         '1/2 tsp salt',
         '30 g parmesan',
         'Fresh basil',
       ],
       steps: [
-        'Slice the garlic thinly. Put the spaghetti, tomatoes, garlic, olive oil, water and salt in a wide pan.',
-        'Bring to a boil, then cook for 10 minutes, turning the pasta often, until it is tender and the sauce coats it.',
-        'Take off the heat, stir in the grated parmesan and tear over the basil.',
+        'Slice the garlic thinly. Put the penne, tomatoes, garlic, olive oil, water and salt in a wide pan.',
+        'Bring to a boil, then cook for 10 minutes, stirring often, until the pasta is tender and the sauce coats it.',
+        'Stir in the cream and let it bubble for 1 minute. Take off the heat, stir in the grated parmesan and scatter over shredded basil.',
       ],
       tags: ['quick', 'vegetarian'],
       mealTypes: ['dinner', 'lunch'],
@@ -144,26 +147,27 @@ export const SAMPLES: Record<Lang, RecipeDraft[]> = {
       cuisine: 'Dansk',
     },
     {
-      title: 'Tomatpasta i én gryde',
+      title: 'Cremet tomatpasta i én gryde',
       description: 'Det hele koger sammen, så stivelsen fra pastaen jævner saucen.',
       lang: 'da',
       servings: 2,
       prepMin: 5,
       cookMin: 15,
       ingredients: [
-        '200 g spaghetti',
+        '200 g penne',
         '1 dåse hakkede tomater',
         '2 fed hvidløg',
         '2 spsk olivenolie',
         '4 dl vand',
+        '1 dl piskefløde',
         '1/2 tsk salt',
         '30 g parmesan',
         'Frisk basilikum',
       ],
       steps: [
-        'Skær hvidløget i tynde skiver. Kom spaghetti, tomater, hvidløg, olivenolie, vand og salt i en bred gryde.',
-        'Bring det i kog, og kog i 10 minutter, mens du vender pastaen ofte, til den er mør og saucen lægger sig om den.',
-        'Tag gryden af varmen, rør revet parmesan i, og riv basilikum over.',
+        'Skær hvidløget i tynde skiver. Kom penne, tomater, hvidløg, olivenolie, vand og salt i en bred gryde.',
+        'Bring det i kog, og kog i 10 minutter, mens du rører ofte, til pastaen er mør og saucen lægger sig om den.',
+        'Rør fløden i, og lad det boble i 1 minut. Tag gryden af varmen, rør revet parmesan i, og drys med strimlet basilikum.',
       ],
       tags: ['hurtig', 'vegetar'],
       mealTypes: ['dinner', 'lunch'],
@@ -228,30 +232,45 @@ export const SAMPLES: Record<Lang, RecipeDraft[]> = {
       cuisine: 'Daniška',
     },
     {
-      title: 'Makaronai su pomidorais viename puode',
+      title: 'Kreminiai makaronai su pomidorais viename puode',
       description: 'Viskas verda kartu, todėl makaronų krakmolas sutirština padažą.',
       lang: 'lt',
       servings: 2,
       prepMin: 5,
       cookMin: 15,
       ingredients: [
-        '200 g spagečių',
+        '200 g makaronų (penne)',
         '1 skardinė trintų pomidorų',
         '2 skiltelės česnako',
         '2 v. š. alyvuogių aliejaus',
         '400 ml vandens',
+        '100 ml grietinėlės',
         '1/2 a. š. druskos',
         '30 g parmezano',
         'Šviežio baziliko',
       ],
       steps: [
-        'Česnaką supjaustykite plonais griežinėliais. Į platų puodą sudėkite spagečius, pomidorus, česnaką, aliejų, vandenį ir druską.',
-        'Užvirkite ir virkite 10 minučių, dažnai vartydami makaronus, kol jie suminkštės ir padažas juos apgaubs.',
-        'Nukelkite nuo ugnies, įmaišykite tarkuotą parmezaną ir užberkite plėšytu baziliku.',
+        'Česnaką supjaustykite plonais griežinėliais. Į platų puodą sudėkite makaronus, pomidorus, česnaką, aliejų, vandenį ir druską.',
+        'Užvirkite ir virkite 10 minučių, dažnai maišydami, kol makaronai suminkštės ir padažas juos apgaubs.',
+        'Supilkite grietinėlę ir pavirkite 1 minutę. Nukelkite nuo ugnies, įmaišykite tarkuotą parmezaną ir užberkite pjaustytu baziliku.',
       ],
       tags: ['greita', 'vegetariška'],
       mealTypes: ['dinner', 'lunch'],
       cuisine: 'Itališka',
     },
   ],
+};
+
+const withPhotos = (list: RecipeDraft[]) => list.map((d, i) => ({ ...d, image: SAMPLE_IMAGE_KEYS[i] }));
+
+export const SAMPLES: Record<Lang, RecipeDraft[]> = { en: withPhotos(TEXTS.en), da: withPhotos(TEXTS.da), lt: withPhotos(TEXTS.lt) };
+
+/** Titles the starter recipes had before they got photos, so libraries seeded earlier pick them up too. */
+export const SAMPLE_IMAGE_BY_TITLE: Record<string, string> = {
+  'Cold beetroot soup (šaltibarščiai)': SAMPLE_IMAGE_KEYS[0],
+  'Kold rødbedesuppe (šaltibarščiai)': SAMPLE_IMAGE_KEYS[0],
+  'Šaltibarščiai': SAMPLE_IMAGE_KEYS[0],
+  'Danish meatballs (frikadeller)': SAMPLE_IMAGE_KEYS[1],
+  Frikadeller: SAMPLE_IMAGE_KEYS[1],
+  'Daniški kotletai (frikadeller)': SAMPLE_IMAGE_KEYS[1],
 };

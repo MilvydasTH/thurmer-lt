@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 
-import { SAMPLES } from '@/data/samples';
+import { SAMPLE_IMAGE_BY_TITLE, SAMPLES } from '@/data/samples';
 import type {
   Cookbook,
   GroceryItem,
@@ -316,7 +316,11 @@ export const useStore = create<State>()(
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<State>;
-        return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...p.settings } };
+        // Starter recipes saved before they had photos get theirs; anything the user gave a photo is left alone.
+        const recipes = (p.recipes ?? current.recipes).map((r) =>
+          !r.image && SAMPLE_IMAGE_BY_TITLE[r.title] ? { ...r, image: SAMPLE_IMAGE_BY_TITLE[r.title] } : r,
+        );
+        return { ...current, ...p, recipes, settings: { ...DEFAULT_SETTINGS, ...p.settings } };
       },
       onRehydrateStorage: () => (state) => {
         // `state` is missing when storage could not be read; the app must still open.
