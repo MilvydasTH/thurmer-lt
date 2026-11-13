@@ -13,7 +13,7 @@ import type {
   RecipeTranslation,
   Settings,
 } from '@/lib/types';
-import { parseIngredientLines, uid } from '@/lib/units';
+import { parseIngredient, parseIngredientLines, uid } from '@/lib/units';
 
 export const DEFAULT_SETTINGS: Settings = {
   lang: 'en',
@@ -336,9 +336,17 @@ export const useStore = create<State>()(
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<State>;
         // Starter recipes saved before they had photos get theirs; anything the user gave a photo is left alone.
-        const recipes = (p.recipes ?? current.recipes).map((r) =>
-          !r.image && SAMPLE_IMAGE_BY_TITLE[r.title] ? { ...r, image: SAMPLE_IMAGE_BY_TITLE[r.title] } : r,
-        );
+        const recipes = (p.recipes ?? current.recipes).map((r) => {
+          const withPhoto = !r.image && SAMPLE_IMAGE_BY_TITLE[r.title] ? { ...r, image: SAMPLE_IMAGE_BY_TITLE[r.title] } : r;
+          // Read amounts again for lines saved before the parser understood them (e.g. "Turmeric – 100 g"),
+          // so older recipes scale too. Lines that already have an amount are not touched.
+          const ingredients = withPhoto.ingredients.map((ing) => {
+            if (ing.header || ing.qty !== undefined) return ing;
+            const again = parseIngredient(ing.raw);
+            return again.qty !== undefined && !again.header ? { ...again, id: ing.id } : ing;
+          });
+          return { ...withPhoto, ingredients };
+        });
         return { ...current, ...p, recipes, settings: { ...DEFAULT_SETTINGS, ...p.settings } };
       },
       onRehydrateStorage: () => (state) => {

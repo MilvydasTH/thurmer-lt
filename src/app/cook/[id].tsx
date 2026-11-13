@@ -12,6 +12,7 @@ import { foodsMentioned } from '@/data/foods';
 import { useLang, useT } from '@/i18n';
 import { convertTemperatures, displayIngredient } from '@/lib/convert';
 import { cancelTimerAlert, scheduleTimerAlert } from '@/lib/notify';
+import { playTimerSound } from '@/lib/sound';
 import { findTimers, formatClock } from '@/lib/timers';
 import type { Lang, UnitSystem } from '@/lib/types';
 import { parseIngredient } from '@/lib/units';
@@ -70,6 +71,7 @@ export default function CookScreen() {
       if (due.length > 0) {
         setTimers((list) => list.map((x) => (x.endsAt <= ts ? { ...x, done: true } : x)));
         toast(`⏰ ${t('cook_timer_done')}: ${due[0].label}`);
+        playTimerSound();
         if (Platform.OS !== 'web') {
           Vibration.vibrate([0, 500, 250, 500, 250, 500]);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});

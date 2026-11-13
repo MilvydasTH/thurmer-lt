@@ -121,6 +121,35 @@ function matchUnit(rest: string): { unit: UnitKey; len: number } | undefined {
   return undefined;
 }
 
+const TRAILING_RE = new RegExp(
+  `^(.*?\\p{L}.*?)(\\s*[:–—-]\\s*|\\s*\\(\\s*|\\s+)(${NUM})(?:\\s*(?:-|–|—|to|til|iki)\\s*(${NUM}))?\\s*([^\\d()]{0,24}?)\\s*\\)?\\.?$`,
+  'iu',
+);
+
+/**
+ * Lines that put the amount last, as many posts and shopping notes do:
+ * "Turmeric – 100 g", "Ciberžolė: 2 vnt.", "Lemons (3)", "Ginger 50 g".
+ * Without a recognised unit, a separator is required, so "Vitamin B 12" is left alone.
+ */
+function parseTrailingAmount(raw: string, base: Ingredient): Ingredient | undefined {
+  const m = raw.match(TRAILING_RE);
+  if (!m) return undefined;
+  const qty = parseNumber(m[3]);
+  if (qty === undefined) return undefined;
+  const unitText = m[5].trim();
+  let unit: UnitKey | undefined;
+  if (unitText) {
+    const u = matchUnit(unitText);
+    if (!u || unitText.slice(u.len).replace(/[.\s]/g, '') !== '') return undefined;
+    unit = u.unit;
+  } else if (!/[:–—(-]/.test(m[2])) {
+    return undefined;
+  }
+  const name = m[1].replace(/[\s:–—(-]+$/, '').trim();
+  if (!name) return undefined;
+  return { ...base, qty, qtyMax: m[4] ? parseNumber(m[4]) : undefined, unit, name };
+}
+
 /** Parses one ingredient line such as "1 1/2 cups flour", "2 spsk smør" or "200 g miltų". */
 export function parseIngredient(line: string): Ingredient {
   const raw = cleanLine(line);
@@ -133,7 +162,7 @@ export function parseIngredient(line: string): Ingredient {
     return { ...base, header: true, name: raw.replace(/^#+\s*/, '').trim() };
   }
   const q = raw.match(QTY_RE);
-  if (!q) return base;
+  if (!q) return parseTrailingAmount(raw, base) ?? base;
   const qty = parseNumber(q[1]);
   if (qty === undefined) return base;
   const qtyMax = q[2] ? parseNumber(q[2]) : undefined;

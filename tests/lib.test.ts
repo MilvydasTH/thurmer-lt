@@ -412,3 +412,26 @@ describe('ingredient names in the app language', () => {
     expect(displayIngredient(parseIngredient('1 tsp thyme'), { ...o, lang: 'da', contentLang: 'en' })).toBe('1 tsp thyme');
   });
 });
+
+describe('amount written after the name', () => {
+  it('reads the amount wherever the line puts it', () => {
+    expect(p('Turmeric – 100 g')).toMatchObject({ qty: 100, unit: 'g', name: 'Turmeric' });
+    expect(p('Ciberžolė: 2 vnt.')).toMatchObject({ qty: 2, unit: 'piece', name: 'Ciberžolė' });
+    expect(p('Lemons (3)')).toMatchObject({ qty: 3, unit: undefined, name: 'Lemons' });
+    expect(p('Ginger 50 g')).toMatchObject({ qty: 50, unit: 'g', name: 'Ginger' });
+    expect(p('Juodieji pipirai - 1 a. š.')).toMatchObject({ qty: 1, unit: 'tsp', name: 'Juodieji pipirai' });
+    expect(p('Apelsinai – 2-3 vnt')).toMatchObject({ qty: 2, qtyMax: 3, unit: 'piece', name: 'Apelsinai' });
+    expect(p('Vand 1,5 l')).toMatchObject({ qty: 1.5, unit: 'l', name: 'Vand' });
+  });
+  it('does not invent an amount', () => {
+    expect(p('Vitamin B 12').qty).toBeUndefined();
+    expect(p('Salt to taste').qty).toBeUndefined();
+    expect(p('Olive oil for frying').qty).toBeUndefined();
+  });
+  it('scales such lines', () => {
+    const o = { scale: 2, system: 'original' as const, useDl: false, lang: 'en' as const };
+    expect(displayIngredient(parseIngredient('Turmeric – 100 g'), o)).toBe('200 g Turmeric');
+    expect(displayIngredient(parseIngredient('Lemons (3)'), o)).toBe('6 Lemons');
+    expect(displayIngredient(parseIngredient('Turmeric – 100 g'), { ...o, scale: 1 })).toBe('Turmeric – 100 g');
+  });
+});
