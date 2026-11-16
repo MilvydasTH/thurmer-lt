@@ -9,6 +9,7 @@ import { Btn, Card, Field, Header, IconBtn, Screen, Segmented, Txt, confirm, toa
 import { dayLabel, useT, type Key } from '@/i18n';
 import { addDays, fromISO, startOfWeek, toISO, weekDates } from '@/lib/dates';
 import { ingredientToGrocery, isPantryItem, type NewGrocery } from '@/lib/grocery';
+import { fillDinners } from '@/lib/suggest';
 import { PLAN_SLOTS, type PlanSlot } from '@/lib/types';
 import { useStore } from '@/store';
 import { space, useColors } from '@/theme';
@@ -109,6 +110,18 @@ export default function PlanScreen() {
           );
         })}
 
+        <Btn
+          variant="secondary"
+          icon="sparkles-outline"
+          title={t('plan_fill')}
+          testID="plan-fill"
+          onPress={() => {
+            const picks = fillDinners(recipes, dates, plan);
+            if (picks.length === 0) return toast(t('plan_fill_none'));
+            for (const e of picks) useStore.getState().addPlan(e);
+            toast(t('plan_filled', { n: picks.length }));
+          }}
+        />
         <Btn title={t('plan_week_to_groceries')} icon="cart-outline" onPress={weekToGroceries} disabled={weekEntries.every((e) => !e.recipeId)} />
         {weekEntries.length > 0 ? (
           <Btn

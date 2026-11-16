@@ -13,6 +13,7 @@ import { useLang, useT } from '@/i18n';
 import { convertTemperatures, displayIngredient } from '@/lib/convert';
 import { cancelTimerAlert, scheduleTimerAlert } from '@/lib/notify';
 import { playTimerSound } from '@/lib/sound';
+import { canSpeak, speak, stopSpeaking } from '@/lib/speak';
 import { findTimers, formatClock } from '@/lib/timers';
 import type { Lang, UnitSystem } from '@/lib/types';
 import { parseIngredient } from '@/lib/units';
@@ -48,6 +49,7 @@ export default function CookScreen() {
   const [timers, setTimers] = useState<RunningTimer[]>([]);
   const [now, setNow] = useState(() => Date.now());
   const [finished, setFinished] = useState(false);
+  const [reading, setReading] = useState(false);
   const timersRef = useRef(timers);
   useEffect(() => {
     timersRef.current = timers;
@@ -108,7 +110,12 @@ export default function CookScreen() {
   // Ingredients this step works with, for the pictures above the text.
   const pictured = foodsMentioned(step).filter((id) => FOOD_IMAGES[id]).slice(0, 3);
   const last = index >= steps.length - 1;
-  const close = () => (router.canGoBack() ? router.back() : router.replace(`/recipe/${recipe.id}`));
+  const spokenLang = translation ? params.view : (recipe.lang ?? lang);
+  const close = () => {
+    stopSpeaking();
+    if (router.canGoBack()) router.back();
+    else router.replace(`/recipe/${recipe.id}`);
+  };
 
   const start = (label: string, seconds: number) => {
     const ts = clock();
@@ -118,6 +125,11 @@ export default function CookScreen() {
     scheduleTimerAlert(t('cook_timer_done'), `${translation?.title || recipe.title} · ${label}`, seconds).then((alertId) => {
       if (alertId) setTimers((list) => list.map((x) => (x.id === id ? { ...x, alertId } : x)));
     });
+  };
+
+  const go = (next: number) => {
+    setIndex(next);
+    if (reading) speak(steps[next], spokenLang);
   };
 
   if (finished) {
@@ -140,6 +152,20 @@ export default function CookScreen() {
           </Txt>
           <Txt v="h3">{t('cook_step_of', { n: index + 1, total: steps.length })}</Txt>
         </View>
+        <IconBtn
+          name={reading ? 'volume-high' : 'volume-mute-outline'}
+          color={reading ? c.primary : undefined}
+          label={t(reading ? 'cook_read_off' : 'cook_read_aloud')}
+          onPress={async () => {
+            if (reading) {
+              stopSpeaking();
+              return setReading(false);
+            }
+            if (!(await canSpeak(spokenLang))) return toast(t('cook_no_voice'));
+            setReading(true);
+            speak(step, spokenLang);
+          }}
+        />
         <Btn small variant="secondary" icon="list" title={t('ingredients')} onPress={() => setShowIngredients(true)} />
       </View>
 
@@ -212,11 +238,15 @@ export default function CookScreen() {
       ) : null}
 
       <View style={{ flexDirection: 'row', gap: space.md, padding: space.lg, paddingBottom: insets.bottom + space.lg }}>
-        <Btn variant="secondary" icon="chevron-back" title={t('cook_prev')} disabled={index === 0} onPress={() => setIndex((i) => Math.max(0, i - 1))} style={{ flex: 1 }} />
+        <Btn variant="secondary" icon="chevron-back" title={t('cook_prev')} disabled={index === 0} onPress={() => go(Math.max(0, index - 1))} style={{ flex: 1 }} />
         <Btn
           title={t(last ? 'cook_finish' : 'cook_next')}
           icon={last ? 'checkmark' : 'chevron-forward'}
-          onPress={() => (last ? setFinished(true) : setIndex((i) => i + 1))}
+          onPress={() => {
+            if (!last) return go(index + 1);
+            stopSpeaking();
+            setFinished(true);
+          }}
           style={{ flex: 1.4 }}
           testID="cook-next"
         />

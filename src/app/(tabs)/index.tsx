@@ -49,7 +49,12 @@ export default function RecipesScreen() {
 
   return (
     <Screen>
-      <Header large title={t('recipes_title')} right={<IconBtn name="add-circle" size={30} color={c.primary} onPress={() => setAdding(true)} label={t('add_recipe')} />} />
+      <Header large title={t('recipes_title')} right={
+          <>
+            <IconBtn name="basket-outline" onPress={() => router.push('/cook-from')} label={t('cookfrom_title')} />
+            <IconBtn name="add-circle" size={30} color={c.primary} onPress={() => setAdding(true)} label={t('add_recipe')} />
+          </>
+        } />
       {recipes.length > 0 ? (
         <View style={{ paddingHorizontal: space.lg, gap: space.sm, paddingBottom: space.sm }}>
           <View
@@ -101,6 +106,27 @@ export default function RecipesScreen() {
         ListHeaderComponent={
           // The ways to add a recipe, always in view at the top of the list rather than behind the + button.
           <View style={{ gap: space.sm }}>
+            <Pressable
+              onPress={() => router.push('/cook-from')}
+              accessibilityRole="button"
+              testID="open-cook-from"
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: space.md,
+                padding: space.md,
+                borderRadius: radius.lg,
+                backgroundColor: c.accentSoft,
+                opacity: pressed ? 0.7 : 1,
+                marginBottom: space.sm,
+              })}>
+              <Ionicons name="basket-outline" size={24} color={c.accent} />
+              <View style={{ flex: 1 }}>
+                <Txt v="h3">{t('cookfrom_title')}</Txt>
+                <Txt v="small">{t('cookfrom_teaser')}</Txt>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={c.sub} />
+            </Pressable>
             <Txt v="label">{t('add_recipe')}</Txt>
             <View style={{ flexDirection: 'row', gap: space.sm }}>
               {QUICK_ADD.map((q) => (

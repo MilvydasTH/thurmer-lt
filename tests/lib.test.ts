@@ -8,7 +8,9 @@ import { formatPrice, offerQuery, parseOffers, pickOffers, storeCoverage } from 
 import { parseRecipeText } from '../src/lib/parseText';
 import { instagramShortcode, parseFacebookEmbed, parseInstagramEmbed, parseTikTokOEmbed, parseYouTubeWatch, youtubeId } from '../src/lib/social';
 import fixture from './fixtures/tjek-offers.json';
+import { cookFrom, fillDinners, libraryFoods, onHandKey, rankByOffers } from '../src/lib/suggest';
 import { findTimers, formatClock } from '../src/lib/timers';
+import type { Recipe } from '../src/lib/types';
 import { translateName } from '../src/lib/translateName';
 import { parseIngredient, parseIngredientLines } from '../src/lib/units';
 
@@ -433,5 +435,44 @@ describe('amount written after the name', () => {
     expect(displayIngredient(parseIngredient('Turmeric – 100 g'), o)).toBe('200 g Turmeric');
     expect(displayIngredient(parseIngredient('Lemons (3)'), o)).toBe('6 Lemons');
     expect(displayIngredient(parseIngredient('Turmeric – 100 g'), { ...o, scale: 1 })).toBe('Turmeric – 100 g');
+  });
+});
+
+describe('suggestions', () => {
+  const mk = (id: string, title: string, lines: string[], extra: Partial<Recipe> = {}): Recipe => ({
+    id, title, servings: 2, ingredients: parseIngredientLines(lines), steps: ['Cook.'], tags: [], mealTypes: ['dinner'],
+    favorite: false, cookbookIds: [], createdAt: 1, updatedAt: 1, ...extra,
+  });
+  const soup = mk('soup', 'Potato soup', ['500 g potatoes', '1 onion', '2 dl cream', '1 tsp salt']);
+  const omelette = mk('om', 'Omelette', ['3 eggs', '1 onion', '20 g butter', '1 pinch salt']);
+  const kage = mk('kage', 'Æblekage', ['4 æbler', '200 g hvedemel', '100 g smør', '2 æg']);
+  const all = [soup, omelette, kage];
+
+  it('ranks recipes by what is missing, across languages', () => {
+    const have = ['eggs', 'butter', 'onion'].map((x) => onHandKey(x)!);
+    const res = cookFrom(all, have, ['salt']);
+    expect(res.map((m) => m.recipe.id)).toEqual(['om', 'kage', 'soup']);
+    expect(res[0]).toMatchObject({ have: 4, total: 4, uses: 3 });
+    expect(res[0].missing).toEqual([]);
+    expect(res[1].missing.map((i) => i.name)).toEqual(['æbler', 'hvedemel']);
+    expect(cookFrom(all, [], ['salt'])).toEqual([]);
+    expect(cookFrom(all, [onHandKey('dragon fruit')!], [])).toEqual([]);
+  });
+  it('fills only empty dinners and prefers recipes that share fresh ingredients', () => {
+    const dates = ['2026-11-16', '2026-11-17', '2026-11-18'];
+    const plan = [{ id: 'p', date: '2026-11-16', slot: 'dinner' as const, recipeId: 'soup' }];
+    const picks = fillDinners(all, dates, plan, () => 0);
+    expect(picks.map((p) => p.date)).toEqual(['2026-11-17', '2026-11-18']);
+    // The omelette shares the onion with Monday's soup, so it comes first.
+    expect(picks.map((p) => p.recipeId)).toEqual(['om', 'kage']);
+    expect(fillDinners(all, ['2026-11-16'], plan)).toEqual([]);
+    expect(fillDinners([], dates, [])).toEqual([]);
+  });
+  it('finds the foods to check for offers and ranks recipes by them', () => {
+    const foods = libraryFoods(all, ['salt']);
+    expect(foods.filter((f) => f.count === 2).map((f) => f.id)).toEqual(['butter', 'egg', 'onion']);
+    expect(foods.find((f) => f.id === 'salt')).toBeUndefined();
+    const ranked = rankByOffers(all, new Set(['butter', 'egg', 'potato']));
+    expect(ranked.map((r) => [r.recipe.id, r.foods.length])).toEqual([['kage', 2], ['om', 2], ['soup', 1]]);
   });
 });

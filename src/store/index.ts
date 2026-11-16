@@ -53,6 +53,8 @@ interface State {
   cookbooks: Cookbook[];
   plan: PlanEntry[];
   groceries: GroceryItem[];
+  /** What the cook has at home, for "What can I cook?". */
+  onHand: string[];
   settings: Settings;
   /** A recipe being imported or edited; handed from the importer to the editor. Not persisted. */
   draft: RecipeDraft | null;
@@ -82,6 +84,7 @@ interface State {
   clearChecked: () => void;
   clearGroceries: () => void;
 
+  setOnHand: (items: string[]) => void;
   updateSettings: (patch: Partial<Settings>) => void;
   setLanguage: (lang: Lang) => void;
   exportBackup: () => Backup;
@@ -159,6 +162,7 @@ export const useStore = create<State>()(
       cookbooks: [],
       plan: [],
       groceries: [],
+      onHand: [],
       settings: DEFAULT_SETTINGS,
       draft: null,
 
@@ -261,6 +265,8 @@ export const useStore = create<State>()(
       clearChecked: () => set((s) => ({ groceries: s.groceries.filter((g) => !g.checked) })),
       clearGroceries: () => set({ groceries: [] }),
 
+      setOnHand: (onHand) => set({ onHand: [...new Set(onHand)] }),
+
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
 
       setLanguage: (lang) =>
@@ -331,6 +337,7 @@ export const useStore = create<State>()(
         cookbooks: s.cookbooks,
         plan: s.plan,
         groceries: s.groceries,
+        onHand: s.onHand,
         settings: s.settings,
       }),
       merge: (persisted, current) => {
@@ -347,7 +354,7 @@ export const useStore = create<State>()(
           });
           return { ...withPhoto, ingredients };
         });
-        return { ...current, ...p, recipes, settings: { ...DEFAULT_SETTINGS, ...p.settings } };
+        return { ...current, ...p, recipes, onHand: Array.isArray(p.onHand) ? p.onHand : [], settings: { ...DEFAULT_SETTINGS, ...p.settings } };
       },
       onRehydrateStorage: () => (state) => {
         // `state` is missing when storage could not be read; the app must still open.
