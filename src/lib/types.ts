@@ -81,6 +81,8 @@ export interface Recipe {
   /** Per-serving nutrition supplied by the source or entered by hand; overrides the estimate. */
   nutrition?: Nutrition;
   translations?: Partial<Record<Lang, RecipeTranslation>>;
+  /** Family member who added or last changed this recipe, when it came from the family library. */
+  addedBy?: string;
   createdAt: number;
   updatedAt: number;
 }

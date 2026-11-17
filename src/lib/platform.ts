@@ -111,3 +111,28 @@ export function openUrl(url: string): void {
   }
   Linking.openURL(url).catch(() => {});
 }
+
+/** A recipe photo as base64 JPEG, shrunk for sending to the family library. Undefined when it cannot be read. */
+export async function imageToBase64(uri: string): Promise<string | undefined> {
+  if (uri.startsWith('data:image')) return uri.slice(uri.indexOf(',') + 1);
+  try {
+    const out = await ImageManipulator.manipulateAsync(uri, [{ resize: { width: 900 } }], {
+      compress: 0.7,
+      format: ImageManipulator.SaveFormat.JPEG,
+      base64: true,
+    });
+    return (out.base64 ?? '').replace(/^data:image\/\w+;base64,/, '') || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Stores a photo received from the family library and returns a URI the app can show. */
+export function saveBase64Image(name: string, base64: string): string {
+  if (Platform.OS === 'web') return `data:image/jpeg;base64,${base64}`;
+  const file = new File(Paths.document, `${name}.jpg`);
+  if (file.exists) file.delete();
+  file.create();
+  file.write(base64, { encoding: 'base64' });
+  return file.uri;
+}

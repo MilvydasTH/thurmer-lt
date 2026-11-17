@@ -163,6 +163,7 @@ export default function RecipeScreen() {
               {title}
             </Txt>
             {description ? <Txt color={c.sub}>{description}</Txt> : null}
+            {recipe.addedBy ? <Txt v="small">{t('family_added_by', { name: recipe.addedBy })}</Txt> : null}
             {recipe.sourceUrl ? (
               <Pressable onPress={() => openUrl(recipe.sourceUrl!)} accessibilityRole="link" style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Ionicons name="link" size={14} color={c.primary} />

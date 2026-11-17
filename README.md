@@ -24,6 +24,7 @@ Built with Expo (React Native) and Expo Router. One codebase for all three platf
 | Meal plan | Week view with breakfast, lunch, dinner and snack, and one button to send the week to the cart. "Suggest dinners" fills the empty days, preferring recipes that share fresh ingredients so less is wasted. |
 | Nutrition | Calories, protein, carbs and fat per serving, estimated from a built-in food table that understands ingredient names in all three languages. It says which ingredients it could not count. |
 | Cook mode | One step at a time in large type, screen kept awake, timers picked out of the step text, and steps read aloud on request. Each step shows photos of the ingredients it mentions, once photos are added to `assets/foods` (see the README there). A recipe without its own photo uses its main ingredient's. |
+| Family sharing | One person creates a family and gets a code; the others join with it and a name. Everyone then shares one recipe library that syncs on its own, with photos. Favourites and cookbooks stay personal. When two people edit the same recipe, the later edit wins. |
 | Share and backup | Share a recipe or the grocery list as text. Export and import the whole library as a file. |
 
 ## Run it
@@ -77,6 +78,21 @@ npx eas-cli@latest deploy      # EAS Hosting; any Node host that runs `expo serv
 
 Then set `EXPO_PUBLIC_API_URL` to that deployment's address when building the phone apps.
 
+### Family sharing
+
+`POST /api/family` keeps each family's recipes on the server. There are no passwords: the family
+code is the key, so anyone who has it can read and change that family's recipes.
+
+The recipes need somewhere to live:
+
+- **Deployed:** create a free Redis database at Upstash and set `UPSTASH_REDIS_REST_URL` and
+  `UPSTASH_REDIS_REST_TOKEN` on the server.
+- **Development, or one Node server with a disk:** nothing to set up; families are stored as
+  files in `.data/` (change the folder with `SKANU_DATA_DIR`).
+
+Starter recipes nobody has edited are not shared, since every phone already has them. The
+shopping cart and meal plan are not shared.
+
 ### Store offers
 
 Offers come from [Tjek](https://tjek.com) (the service behind eTilbudsavis), which carries the
@@ -103,9 +119,8 @@ in memory per server instance, so on a host that runs many instances add the hos
 - **Recipes that are only spoken in a video cannot be imported.** Social imports read the caption.
   Instagram in particular often refuses to hand captions to servers; when that happens the app
   says so and you can paste the caption as text.
-- **No cloud sync or accounts.** The library lives on the device. Moving between devices is done
-  with the backup file. Sync needs a hosted database and sign-in, which is a product decision
-  (which provider, what it costs) rather than something to guess at.
+- **Family sharing has no logins.** A family is protected only by its code. The cart and the
+  meal plan are not shared, only recipes.
 - **Ordering groceries opens the store's search, item by item** (Barbora and Rimi in Lithuania,
   nemlig.com in Denmark). These stores offer no way for an app to fill a basket.
 - **Nutrition is an estimate** from about 110 common foods. Recipes that state their own

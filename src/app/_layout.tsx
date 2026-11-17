@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { Platform, View } from 'react-native';
 
+import { FamilySync } from '@/components/family-sync';
 import { IncomingShare } from '@/components/incoming-share';
 import { Btn, ConfirmHost, Empty, Screen, ToastHost } from '@/components/ui';
 import { detectLang, useT } from '@/i18n';
@@ -66,6 +67,7 @@ export default function RootLayout() {
         <Stack.Screen name="cook/[id]" options={{ animation: 'fade', gestureEnabled: false }} />
       </Stack>
       {Platform.OS !== 'web' ? <IncomingShare /> : null}
+      <FamilySync />
       <ConfirmHost />
       <ToastHost />
     </ThemeProvider>

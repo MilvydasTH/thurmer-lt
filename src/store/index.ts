@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 
 import { SAMPLE_IMAGE_BY_TITLE, SAMPLES } from '@/data/samples';
+import type { FamilyChange, FamilyInfo, FamilyMember } from '@/lib/familyTypes';
 import type {
   Cookbook,
   GroceryItem,
@@ -45,6 +46,24 @@ export interface Backup {
   settings?: Settings;
 }
 
+export interface FamilyLink {
+  code: string;
+  name: string;
+  memberId: string;
+  memberName: string;
+  members: FamilyMember[];
+  /** How far into the family's change list this phone has caught up. */
+  cursor: number;
+  lastSync?: number;
+}
+
+const SAMPLE_TITLES = new Set(Object.values(SAMPLES).flatMap((list) => list.map((d) => d.title)));
+
+/** A starter recipe nobody has edited. Every phone has its own copy, so these are never shared. */
+export function isUntouchedSample(r: Recipe): boolean {
+  return r.createdAt === r.updatedAt && SAMPLE_TITLES.has(r.title);
+}
+
 interface State {
   hydrated: boolean;
   /** False until the first-run language/pantry defaults and sample recipes are in place. */
@@ -58,6 +77,12 @@ interface State {
   settings: Settings;
   /** A recipe being imported or edited; handed from the importer to the editor. Not persisted. */
   draft: RecipeDraft | null;
+  /** The family this phone shares recipes with, if any. */
+  family: FamilyLink | null;
+  /** Recipes changed here that the family has not received yet. */
+  dirty: string[];
+  /** Recipes deleted here that the family has not been told about yet. */
+  tombstones: { id: string; at: number }[];
 
   setHydrated: () => void;
   firstRun: (lang: Lang) => void;
@@ -85,6 +110,10 @@ interface State {
   clearGroceries: () => void;
 
   setOnHand: (items: string[]) => void;
+  joinFamily: (info: FamilyInfo, memberId: string, memberName: string, shareExisting: boolean) => void;
+  leaveFamily: () => void;
+  /** Records what a sync achieved: what was sent, what arrived, and how far we have caught up. */
+  applyFamilySync: (r: { sent: { id: string; updatedAt: number }[]; sentDeletes: string[]; changes: (FamilyChange & { image?: string })[]; cursor: number; family: FamilyInfo }) => void;
   updateSettings: (patch: Partial<Settings>) => void;
   setLanguage: (lang: Lang) => void;
   exportBackup: () => Backup;
@@ -165,6 +194,9 @@ export const useStore = create<State>()(
       onHand: [],
       settings: DEFAULT_SETTINGS,
       draft: null,
+      family: null,
+      dirty: [],
+      tombstones: [],
 
       setHydrated: () => set({ hydrated: true }),
 
@@ -200,6 +232,7 @@ export const useStore = create<State>()(
         const recipe = draftToRecipe(d, existing);
         set((s) => ({
           recipes: existing ? s.recipes.map((r) => (r.id === recipe.id ? recipe : r)) : [recipe, ...s.recipes],
+          dirty: s.family && !s.dirty.includes(recipe.id) ? [...s.dirty, recipe.id] : s.dirty,
         }));
         return recipe;
       },
@@ -208,6 +241,8 @@ export const useStore = create<State>()(
         set((s) => ({
           recipes: s.recipes.filter((r) => r.id !== id),
           plan: s.plan.filter((p) => p.recipeId !== id),
+          dirty: s.dirty.filter((x) => x !== id),
+          tombstones: s.family ? [...s.tombstones.filter((x) => x.id !== id), { id, at: Date.now() }] : s.tombstones,
         })),
 
       toggleFavorite: (id) =>
@@ -226,7 +261,7 @@ export const useStore = create<State>()(
         if (!src) return undefined;
         const now = Date.now();
         const copy: Recipe = { ...src, id: uid(), title: `${src.title} ${suffix}`, favorite: false, createdAt: now, updatedAt: now };
-        set((s) => ({ recipes: [copy, ...s.recipes] }));
+        set((s) => ({ recipes: [copy, ...s.recipes], dirty: s.family ? [...s.dirty, copy.id] : s.dirty }));
         return copy.id;
       },
 
@@ -266,6 +301,57 @@ export const useStore = create<State>()(
       clearGroceries: () => set({ groceries: [] }),
 
       setOnHand: (onHand) => set({ onHand: [...new Set(onHand)] }),
+
+      joinFamily: (info, memberId, memberName, shareExisting) =>
+        set((s) => ({
+          family: { code: info.code, name: info.name, members: info.members, memberId, memberName, cursor: 0 },
+          dirty: shareExisting ? s.recipes.filter((r) => !isUntouchedSample(r)).map((r) => r.id) : [],
+          tombstones: [],
+        })),
+
+      // Leaving keeps every recipe on this phone; it only stops the exchange.
+      leaveFamily: () => set({ family: null, dirty: [], tombstones: [] }),
+
+      applyFamilySync: ({ sent, sentDeletes, changes, cursor, family }) =>
+        set((s) => {
+          if (!s.family) return {};
+          let recipes = s.recipes;
+          let plan = s.plan;
+          for (const c of changes) {
+            const local = recipes.find((r) => r.id === c.id);
+            // Something newer on this phone that has not gone out yet wins over what arrived.
+            if (local && local.updatedAt >= c.updatedAt) continue;
+            if (c.deleted) {
+              recipes = recipes.filter((r) => r.id !== c.id);
+              plan = plan.filter((p) => p.recipeId !== c.id);
+            } else if (c.recipe) {
+              const merged: Recipe = {
+                ...c.recipe,
+                id: c.id,
+                image: c.image ?? c.recipe.image,
+                favorite: local?.favorite ?? false,
+                cookbookIds: local?.cookbookIds ?? [],
+                addedBy: c.by,
+              };
+              recipes = local ? recipes.map((r) => (r.id === c.id ? merged : r)) : [merged, ...recipes];
+            }
+          }
+          // Only forget a pending change if the recipe was not edited again while the sync ran.
+          const stillDirty = s.dirty.filter((id) => {
+            const pushed = sent.find((x) => x.id === id);
+            // Nothing to send for a recipe that no longer exists here.
+            if (!pushed) return s.recipes.some((r) => r.id === id);
+            const now = s.recipes.find((r) => r.id === id);
+            return !!now && now.updatedAt !== pushed.updatedAt;
+          });
+          return {
+            recipes,
+            plan,
+            dirty: stillDirty,
+            tombstones: s.tombstones.filter((x) => !sentDeletes.includes(x.id)),
+            family: { ...s.family, name: family.name, members: family.members, cursor, lastSync: Date.now() },
+          };
+        }),
 
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
 
@@ -318,6 +404,8 @@ export const useStore = create<State>()(
         const planIds = new Set(plan.map((p) => p.id));
         set((s) => ({
           recipes: [...incoming, ...s.recipes.filter((r) => !ids.has(r.id))],
+          // Recipes restored from a backup are new to the family too.
+          dirty: s.family ? [...new Set([...s.dirty, ...incoming.map((r) => r.id)])] : s.dirty,
           cookbooks: [...s.cookbooks.filter((c) => !bookIds.has(c.id)), ...books],
           plan: [...s.plan.filter((p) => !planIds.has(p.id)), ...plan],
         }));
@@ -339,6 +427,9 @@ export const useStore = create<State>()(
         groceries: s.groceries,
         onHand: s.onHand,
         settings: s.settings,
+        family: s.family,
+        dirty: s.dirty,
+        tombstones: s.tombstones,
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<State>;

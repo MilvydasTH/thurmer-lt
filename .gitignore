@@ -44,3 +44,6 @@ example
 
 # secrets
 .env
+
+# family libraries stored on disk in development
+.data/

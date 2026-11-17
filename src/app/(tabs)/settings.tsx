@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { FamilySection } from '@/components/family-section';
 import { Btn, Card, Chip, Field, Header, MenuRow, Screen, Segmented, Txt, confirm, toast } from '@/components/ui';
 import { LANGUAGES, useT } from '@/i18n';
 import { getServerStatus, type ServerStatus } from '@/lib/api';
@@ -179,6 +180,10 @@ export default function SettingsScreen() {
           <Txt v="small">{t('settings_backup_help', { n: recipeCount })}</Txt>
           <MenuRow icon="download-outline" title={t('settings_export')} onPress={exportData} />
           <MenuRow icon="push-outline" title={t('settings_import')} onPress={importData} />
+        </Section>
+
+        <Section title={t('family_title')}>
+          <FamilySection />
         </Section>
 
         <Section title={t('settings_ai')}>
