@@ -1,4 +1,4 @@
-import type { Recipe } from './types';
+import type { GroceryItem, Recipe } from './types';
 
 /** A recipe as it travels between family members: personal bits (favourite, cookbooks) stay on each phone. */
 export type SharedRecipe = Omit<Recipe, 'favorite' | 'cookbookIds'>;
@@ -8,12 +8,14 @@ export interface FamilyMember {
   name: string;
 }
 
-/** One change to the family library. `recipe` is absent when the recipe was deleted. */
+/** One change to what the family shares: a recipe or a cart item. Both are absent when it was deleted. */
 export interface FamilyChange {
   id: string;
   updatedAt: number;
   deleted?: boolean;
   recipe?: SharedRecipe;
+  /** A shopping cart item. */
+  item?: GroceryItem;
   /** The recipe photo as base64 JPEG, when it lives on the sender's phone rather than at a web address. */
   imageData?: string;
   /** Name of the member who made the change. */

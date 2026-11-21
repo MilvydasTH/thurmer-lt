@@ -83,6 +83,9 @@ interface State {
   dirty: string[];
   /** Recipes deleted here that the family has not been told about yet. */
   tombstones: { id: string; at: number }[];
+  /** Cart items changed or removed here that the family has not received yet. */
+  cartDirty: string[];
+  cartGone: { id: string; at: number }[];
 
   setHydrated: () => void;
   firstRun: (lang: Lang) => void;
@@ -108,12 +111,13 @@ interface State {
   removeGroceries: (ids: string[]) => void;
   clearChecked: () => void;
   clearGroceries: () => void;
+  dropGroceries: (gone: (g: GroceryItem) => boolean) => void;
 
   setOnHand: (items: string[]) => void;
   joinFamily: (info: FamilyInfo, memberId: string, memberName: string, shareExisting: boolean) => void;
   leaveFamily: () => void;
   /** Records what a sync achieved: what was sent, what arrived, and how far we have caught up. */
-  applyFamilySync: (r: { sent: { id: string; updatedAt: number }[]; sentDeletes: string[]; changes: (FamilyChange & { image?: string })[]; cursor: number; family: FamilyInfo }) => void;
+  applyFamilySync: (r: { sent: { id: string; updatedAt: number }[]; sentDeletes: string[]; sentItems: { id: string; updatedAt: number }[]; changes: (FamilyChange & { image?: string })[]; cursor: number; family: FamilyInfo }) => void;
   updateSettings: (patch: Partial<Settings>) => void;
   setLanguage: (lang: Lang) => void;
   exportBackup: () => Backup;
@@ -197,6 +201,8 @@ export const useStore = create<State>()(
       family: null,
       dirty: [],
       tombstones: [],
+      cartDirty: [],
+      cartGone: [],
 
       setHydrated: () => set({ hydrated: true }),
 
@@ -288,17 +294,37 @@ export const useStore = create<State>()(
 
       addGroceries: (items) => {
         const now = Date.now();
+        const added = items.map((it, i) => ({ ...it, id: uid(), checked: false, createdAt: now + i, updatedAt: now + i }));
         set((s) => ({
-          groceries: [...s.groceries, ...items.map((it, i) => ({ ...it, id: uid(), checked: false, createdAt: now + i }))],
+          groceries: [...s.groceries, ...added],
+          cartDirty: s.family ? [...s.cartDirty, ...added.map((g) => g.id)] : s.cartDirty,
         }));
       },
 
       setGroceriesChecked: (ids, checked) =>
-        set((s) => ({ groceries: s.groceries.map((g) => (ids.includes(g.id) ? { ...g, checked } : g)) })),
+        set((s) => {
+          const now = Date.now();
+          return {
+            groceries: s.groceries.map((g) => (ids.includes(g.id) ? { ...g, checked, updatedAt: now } : g)),
+            cartDirty: s.family ? [...new Set([...s.cartDirty, ...ids])] : s.cartDirty,
+          };
+        }),
 
-      removeGroceries: (ids) => set((s) => ({ groceries: s.groceries.filter((g) => !ids.includes(g.id)) })),
-      clearChecked: () => set((s) => ({ groceries: s.groceries.filter((g) => !g.checked) })),
-      clearGroceries: () => set({ groceries: [] }),
+      removeGroceries: (ids) => get().dropGroceries((g) => ids.includes(g.id)),
+      clearChecked: () => get().dropGroceries((g) => g.checked),
+      clearGroceries: () => get().dropGroceries(() => true),
+
+      dropGroceries: (gone) =>
+        set((s) => {
+          const now = Date.now();
+          const removed = s.groceries.filter(gone);
+          return {
+            groceries: s.groceries.filter((g) => !gone(g)),
+            cartDirty: s.cartDirty.filter((id) => !removed.some((g) => g.id === id)),
+            // Tell the family too, or the item would come straight back from someone else's phone.
+            cartGone: s.family ? [...s.cartGone, ...removed.map((g) => ({ id: g.id, at: now }))] : s.cartGone,
+          };
+        }),
 
       setOnHand: (onHand) => set({ onHand: [...new Set(onHand)] }),
 
@@ -307,17 +333,32 @@ export const useStore = create<State>()(
           family: { code: info.code, name: info.name, members: info.members, memberId, memberName, cursor: 0 },
           dirty: shareExisting ? s.recipes.filter((r) => !isUntouchedSample(r)).map((r) => r.id) : [],
           tombstones: [],
+          cartDirty: shareExisting ? s.groceries.map((g) => g.id) : [],
+          cartGone: [],
         })),
 
       // Leaving keeps every recipe on this phone; it only stops the exchange.
-      leaveFamily: () => set({ family: null, dirty: [], tombstones: [] }),
+      leaveFamily: () => set({ family: null, dirty: [], tombstones: [], cartDirty: [], cartGone: [] }),
 
-      applyFamilySync: ({ sent, sentDeletes, changes, cursor, family }) =>
+      applyFamilySync: ({ sent, sentDeletes, sentItems, changes, cursor, family }) =>
         set((s) => {
           if (!s.family) return {};
           let recipes = s.recipes;
           let plan = s.plan;
+          let groceries = s.groceries;
+          const stamp = (g: GroceryItem) => g.updatedAt ?? g.createdAt;
           for (const c of changes) {
+            const inCart = groceries.find((g) => g.id === c.id);
+            if (c.item) {
+              if (inCart && stamp(inCart) >= c.updatedAt) continue;
+              const item: GroceryItem = { ...c.item, id: c.id, updatedAt: c.updatedAt };
+              groceries = inCart ? groceries.map((g) => (g.id === c.id ? item : g)) : [...groceries, item];
+              continue;
+            }
+            if (c.deleted && inCart) {
+              if (stamp(inCart) < c.updatedAt) groceries = groceries.filter((g) => g.id !== c.id);
+              continue;
+            }
             const local = recipes.find((r) => r.id === c.id);
             // Something newer on this phone that has not gone out yet wins over what arrived.
             if (local && local.updatedAt >= c.updatedAt) continue;
@@ -344,10 +385,19 @@ export const useStore = create<State>()(
             const now = s.recipes.find((r) => r.id === id);
             return !!now && now.updatedAt !== pushed.updatedAt;
           });
+          const cartDirty = s.cartDirty.filter((id) => {
+            const pushed = sentItems.find((x) => x.id === id);
+            const now = s.groceries.find((g) => g.id === id);
+            if (!pushed) return !!now;
+            return !!now && stamp(now) !== pushed.updatedAt;
+          });
           return {
             recipes,
             plan,
+            groceries,
             dirty: stillDirty,
+            cartDirty,
+            cartGone: s.cartGone.filter((x) => !sentDeletes.includes(x.id)),
             tombstones: s.tombstones.filter((x) => !sentDeletes.includes(x.id)),
             family: { ...s.family, name: family.name, members: family.members, cursor, lastSync: Date.now() },
           };
@@ -430,6 +480,8 @@ export const useStore = create<State>()(
         family: s.family,
         dirty: s.dirty,
         tombstones: s.tombstones,
+        cartDirty: s.cartDirty,
+        cartGone: s.cartGone,
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<State>;

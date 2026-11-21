@@ -103,3 +103,32 @@ describe('family sharing', () => {
     await expect(sync(ben, 0)).rejects.toThrow();
   });
 });
+
+describe('shared cart', () => {
+  const item = (id: string, name: string, updatedAt: number, checked = false) => ({
+    id, updatedAt, item: { id, name, aisle: 'other' as const, checked, createdAt: 1, updatedAt },
+  });
+  it('passes cart items, ticks and removals between members', async () => {
+    const kv = memoryKV();
+    const a = await handleFamily(kv, { action: 'create', familyName: 'Home', memberName: 'Ana' });
+    if (!a.ok || !('memberId' in a)) throw new Error('create failed');
+    const b = await handleFamily(kv, { action: 'join', code: a.family.code, memberName: 'Ben' });
+    if (!b.ok || !('memberId' in b)) throw new Error('join failed');
+    const sync = async (memberId: string, cursor: number, push: FamilyChange[] = []) => {
+      const r = await handleFamily(kv, { action: 'sync', code: a.family.code, memberId, cursor, push });
+      if (!r.ok || !('changes' in r)) throw new Error('sync failed');
+      return r;
+    };
+    await sync(a.memberId, 0, [item('milk1', '2 l milk', 100), item('eggs1', 'eggs', 101)]);
+    let got = await sync(b.memberId, 0);
+    expect(got.changes.map((c) => c.item?.name)).toEqual(['2 l milk', 'eggs']);
+    // Ben ticks the milk in the shop; Ana sees it ticked.
+    await sync(b.memberId, got.cursor, [item('milk1', '2 l milk', 200, true)]);
+    got = await sync(a.memberId, 0);
+    expect(got.changes.find((c) => c.id === 'milk1')?.item?.checked).toBe(true);
+    // Ana clears it; Ben is told.
+    const benAt = (await sync(b.memberId, 0)).cursor;
+    await sync(a.memberId, got.cursor, [{ id: 'milk1', updatedAt: 300, deleted: true }]);
+    expect((await sync(b.memberId, benAt)).changes).toMatchObject([{ id: 'milk1', deleted: true }]);
+  });
+});

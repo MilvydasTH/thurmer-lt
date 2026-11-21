@@ -1,7 +1,7 @@
 import { apiPost } from './api';
 import type { FamilyChange, FamilyInfo, FamilyRequest, FamilyResponse, SharedRecipe } from './familyTypes';
 import { imageToBase64, saveBase64Image } from './platform';
-import type { Recipe } from './types';
+import type { GroceryItem, Recipe } from './types';
 import { isUntouchedSample, useStore } from '@/store';
 
 async function call(req: FamilyRequest): Promise<FamilyResponse | { ok: false; error: 'network' }> {
@@ -69,13 +69,18 @@ async function run(): Promise<FamilySyncResult> {
     const f = s.family;
     if (!f) return 'none';
 
-    const deletes = s.tombstones.slice(0, 10);
+    const deletes = [...s.tombstones, ...s.cartGone].slice(0, 30);
+    const items = s.cartDirty
+      .map((id) => s.groceries.find((g) => g.id === id))
+      .filter((g): g is GroceryItem => !!g)
+      .slice(0, 25);
     const toSend = s.dirty
       .map((id) => s.recipes.find((r) => r.id === id))
       .filter((r): r is Recipe => !!r && !isUntouchedSample(r))
       .slice(0, 3);
     const push: FamilyChange[] = [
       ...deletes.map((d) => ({ id: d.id, updatedAt: d.at, deleted: true })),
+      ...items.map((g) => ({ id: g.id, updatedAt: g.updatedAt ?? g.createdAt, item: g })),
       ...(await Promise.all(toSend.map(outgoing))),
     ];
 
@@ -101,6 +106,7 @@ async function run(): Promise<FamilySyncResult> {
     useStore.getState().applyFamilySync({
       sent: toSend.map((r) => ({ id: r.id, updatedAt: r.updatedAt })),
       sentDeletes: deletes.map((d) => d.id),
+      sentItems: items.map((g) => ({ id: g.id, updatedAt: g.updatedAt ?? g.createdAt })),
       changes,
       cursor: res.cursor,
       family,
@@ -112,7 +118,8 @@ async function run(): Promise<FamilySyncResult> {
       const r = after.recipes.find((x) => x.id === id);
       return !!r && !isUntouchedSample(r);
     });
-    if (!res.more && waiting.length === 0 && after.tombstones.length === 0) return 'ok';
+    const cartWaiting = after.cartDirty.filter((id) => after.groceries.some((g) => g.id === id));
+    if (!res.more && waiting.length === 0 && cartWaiting.length === 0 && after.tombstones.length === 0 && after.cartGone.length === 0) return 'ok';
   }
   return 'ok';
 }

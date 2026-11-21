@@ -346,7 +346,7 @@ export const en = {
   family_your_name: 'Your name',
   family_your_name_ph: 'Shown next to recipes you add',
   family_share_existing: 'Share the recipes I already have',
-  family_share_existing_help: 'Everyone in the family will get them. Favourites and cookbooks stay personal.',
+  family_share_existing_help: 'Everyone in the family will get them. The shopping cart is shared too. Favourites and cookbooks stay personal.',
   family_joined: 'You are in. Recipes are being shared.',
   family_you: 'you',
   family_code_help: 'Anyone with this code can see and change the family’s recipes, so only give it to family.',

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: 'bad_request' }, { status: 400 });
   }
   // Joining is where a code could be guessed, so it gets the tightest limit.
-  const limited = body?.action === 'join' || body?.action === 'create' ? tooMany(request, 'family-join', 8) : tooMany(request, 'family', 90);
+  const limited = body?.action === 'join' || body?.action === 'create' ? tooMany(request, 'family-join', 8) : tooMany(request, 'family', 300);
   if (limited) return limited;
   try {
     const res = await handleFamily(defaultKV(), body);

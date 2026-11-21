@@ -336,7 +336,7 @@ export const da: Dict = {
   family_your_name: 'Dit navn',
   family_your_name_ph: 'Vises ved de opskrifter, du tilføjer',
   family_share_existing: 'Del de opskrifter, jeg allerede har',
-  family_share_existing_help: 'Alle i familien får dem. Favoritter og kogebøger forbliver personlige.',
+  family_share_existing_help: 'Alle i familien får dem. Indkøbskurven deles også. Favoritter og kogebøger forbliver personlige.',
   family_joined: 'Du er med. Opskrifterne bliver delt.',
   family_you: 'dig',
   family_code_help: 'Alle med koden kan se og ændre familiens opskrifter, så giv den kun til familien.',

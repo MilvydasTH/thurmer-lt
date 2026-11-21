@@ -5,7 +5,11 @@ import type { KV } from './kv';
 const MAX_MEMBERS = 12;
 const MAX_RECIPES = 3000;
 const MAX_RECIPE_BYTES = 700_000;
-const PAGE = 8;
+/** A reply stops growing at this many changes or this many bytes, whichever comes first. */
+const PAGE = 40;
+const PAGE_BYTES = 600_000;
+/** Deleted entries are remembered this long so every phone hears about the deletion. */
+const TOMBSTONE_DAYS = 45;
 
 interface Meta {
   name: string;
@@ -13,7 +17,8 @@ interface Meta {
   members: { id: string; name: string; joinedAt: number }[];
   /** Counts every accepted change; a phone asks for "everything after number N". */
   seq: number;
-  index: Record<string, { seq: number; updatedAt: number; deleted?: boolean; by?: string }>;
+  /** `at` is the server's own clock when the change arrived; `updatedAt` is the phone's. */
+  index: Record<string, { seq: number; updatedAt: number; deleted?: boolean; by?: string; at?: number }>;
 }
 
 const metaKey = (code: string) => `fam:${code}`;
@@ -91,7 +96,7 @@ export async function handleFamily(kv: KV, req: FamilyRequest, now = Date.now())
 
   // 1. Take in what this phone changed. An older edit never overwrites a newer one.
   let changed = false;
-  for (const c of req.push.slice(0, 20)) {
+  for (const c of req.push.slice(0, 60)) {
     if (!c || typeof c.id !== 'string' || !/^[A-Za-z0-9_-]{4,64}$/.test(c.id) || typeof c.updatedAt !== 'number') continue;
     const known = meta.index[c.id];
     if (known && known.updatedAt >= c.updatedAt) continue;
@@ -99,38 +104,52 @@ export async function handleFamily(kv: KV, req: FamilyRequest, now = Date.now())
       if (!known) continue;
       await kv.del(recipeKey(code, c.id));
     } else {
-      if (!c.recipe || typeof c.recipe.title !== 'string' || !Array.isArray(c.recipe.ingredients) || !Array.isArray(c.recipe.steps)) continue;
-      if (!known && Object.keys(meta.index).length >= MAX_RECIPES) return { ok: false, error: 'full' };
-      const body = JSON.stringify({ recipe: { ...c.recipe, id: c.id, updatedAt: c.updatedAt }, imageData: typeof c.imageData === 'string' ? c.imageData : undefined });
+      const isItem = !!c.item && typeof c.item.name === 'string';
+      const isRecipe = !!c.recipe && typeof c.recipe.title === 'string' && Array.isArray(c.recipe.ingredients) && Array.isArray(c.recipe.steps);
+      if (!isItem && !isRecipe) continue;
+      if (!known && Object.values(meta.index).filter((v) => !v.deleted).length >= MAX_RECIPES) return { ok: false, error: 'full' };
+      const body = isItem
+        ? JSON.stringify({ item: { ...c.item, id: c.id, name: c.item!.name.slice(0, 200), updatedAt: c.updatedAt } })
+        : JSON.stringify({ recipe: { ...c.recipe, id: c.id, updatedAt: c.updatedAt }, imageData: typeof c.imageData === 'string' ? c.imageData : undefined });
       if (body.length > MAX_RECIPE_BYTES) return { ok: false, error: 'too_large' };
       await kv.set(recipeKey(code, c.id), body);
     }
     meta.seq += 1;
-    meta.index[c.id] = { seq: meta.seq, updatedAt: c.updatedAt, deleted: c.deleted ? true : undefined, by: me.name };
+    meta.index[c.id] = { seq: meta.seq, updatedAt: c.updatedAt, deleted: c.deleted ? true : undefined, by: me.name, at: now };
     changed = true;
   }
-  if (changed) await kv.set(metaKey(code), JSON.stringify(meta));
+  if (changed) {
+    // A shopping cart churns; forget deletions everyone has had ample time to receive.
+    const cutoff = now - TOMBSTONE_DAYS * 86_400_000;
+    for (const [id, v] of Object.entries(meta.index)) if (v.deleted && (v.at ?? now) < cutoff) delete meta.index[id];
+    await kv.set(metaKey(code), JSON.stringify(meta));
+  }
 
   // 2. Hand back what this phone has not seen yet, a few at a time so no reply gets huge.
   const pending = Object.entries(meta.index)
     .filter(([, v]) => v.seq > req.cursor)
     .sort((a, b) => a[1].seq - b[1].seq);
-  const page = pending.slice(0, PAGE);
   const changes: FamilyChange[] = [];
-  for (const [id, v] of page) {
+  let bytes = 0;
+  let taken = 0;
+  for (const [id, v] of pending) {
+    if (taken >= PAGE || bytes >= PAGE_BYTES) break;
+    taken++;
     if (v.deleted) {
       changes.push({ id, updatedAt: v.updatedAt, deleted: true, by: v.by });
       continue;
     }
     const raw = await kv.get(recipeKey(code, id));
     if (!raw) continue;
+    bytes += raw.length;
     try {
-      const stored = JSON.parse(raw) as { recipe: FamilyChange['recipe']; imageData?: string };
-      changes.push({ id, updatedAt: v.updatedAt, recipe: stored.recipe, imageData: stored.imageData, by: v.by });
+      const stored = JSON.parse(raw) as { recipe?: FamilyChange['recipe']; item?: FamilyChange['item']; imageData?: string };
+      changes.push({ id, updatedAt: v.updatedAt, recipe: stored.recipe, item: stored.item, imageData: stored.imageData, by: v.by });
     } catch {
       /* skip a damaged record rather than fail the whole sync */
     }
   }
+  const page = pending.slice(0, taken);
   const cursor = page.length > 0 ? page[page.length - 1][1].seq : Math.max(req.cursor, 0);
   return { ok: true, family: info(code, meta), cursor: Math.min(cursor, meta.seq), changes, more: pending.length > page.length };
 }

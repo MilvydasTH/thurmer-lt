@@ -336,7 +336,7 @@ export const lt: Dict = {
   family_your_name: 'Jūsų vardas',
   family_your_name_ph: 'Rodomas prie jūsų pridėtų receptų',
   family_share_existing: 'Dalintis jau turimais receptais',
-  family_share_existing_help: 'Juos gaus visi šeimos nariai. Mėgstamiausi ir receptų knygos lieka asmeniniai.',
+  family_share_existing_help: 'Juos gaus visi šeimos nariai. Pirkinių krepšelis taip pat bendras. Mėgstamiausi ir receptų knygos lieka asmeniniai.',
   family_joined: 'Prisijungėte. Receptai bendrinami.',
   family_you: 'jūs',
   family_code_help: 'Kiekvienas, turintis šį kodą, gali matyti ir keisti šeimos receptus, todėl duokite jį tik šeimai.',

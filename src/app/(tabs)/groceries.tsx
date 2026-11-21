@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Btn, Card, Check, Empty, Header, IconBtn, MenuRow, Screen, Segmented, Sheet, Txt, confirm, toast } from '@/components/ui';
 import { useLang, useT, type Key, type TFn } from '@/i18n';
+import { syncFamily } from '@/lib/familySync';
 import { approximatePlace } from '@/lib/location';
 import { cartName, itemLabel, manualGrocery, mergeGroceries, storesFor, type MergedItem } from '@/lib/grocery';
 import { formatPrice, startsLater, storeCoverage, type Offer } from '@/lib/offers';
@@ -55,6 +56,18 @@ export default function CartScreen() {
   const [offerState, setOfferState] = useState<'idle' | 'loading' | 'failed' | 'unconfigured'>('idle');
   const [offerItem, setOfferItem] = useState<MergedItem | null>(null);
   const [refresh, setRefresh] = useState(0);
+
+  // While the cart is on screen, check with the family every few seconds: two people shopping
+  // from the same list need to see each other's ticks almost at once.
+  const inFamily = useStore((s) => !!s.family);
+  useFocusEffect(
+    useCallback(() => {
+      if (!inFamily) return;
+      void syncFamily();
+      const timer = setInterval(() => void syncFamily(), 6000);
+      return () => clearInterval(timer);
+    }, [inFamily]),
+  );
 
   const merged = useMemo(() => mergeGroceries(groceries, lang, useDl), [groceries, lang, useDl]);
   const left = useMemo(() => merged.filter((m) => !m.checked), [merged]);

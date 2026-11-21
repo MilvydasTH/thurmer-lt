@@ -24,7 +24,7 @@ Built with Expo (React Native) and Expo Router. One codebase for all three platf
 | Meal plan | Week view with breakfast, lunch, dinner and snack, and one button to send the week to the cart. "Suggest dinners" fills the empty days, preferring recipes that share fresh ingredients so less is wasted. |
 | Nutrition | Calories, protein, carbs and fat per serving, estimated from a built-in food table that understands ingredient names in all three languages. It says which ingredients it could not count. |
 | Cook mode | One step at a time in large type, screen kept awake, timers picked out of the step text, and steps read aloud on request. Each step shows photos of the ingredients it mentions, once photos are added to `assets/foods` (see the README there). A recipe without its own photo uses its main ingredient's. |
-| Family sharing | One person creates a family and gets a code; the others join with it and a name. Everyone then shares one recipe library that syncs on its own, with photos. Favourites and cookbooks stay personal. When two people edit the same recipe, the later edit wins. |
+| Family sharing | One person creates a family and gets a code; the others join with it and a name. Everyone then shares one recipe library and one shopping cart that sync on their own; ticks in the cart reach the others within seconds while it is open. Favourites, cookbooks and the meal plan stay personal. When two people edit the same recipe, the later edit wins. |
 | Share and backup | Share a recipe or the grocery list as text. Export and import the whole library as a file. |
 
 ## Run it
@@ -91,7 +91,7 @@ The recipes need somewhere to live:
   files in `.data/` (change the folder with `SKANU_DATA_DIR`).
 
 Starter recipes nobody has edited are not shared, since every phone already has them. The
-shopping cart and meal plan are not shared.
+meal plan is not shared.
 
 ### Store offers
 
@@ -119,8 +119,8 @@ in memory per server instance, so on a host that runs many instances add the hos
 - **Recipes that are only spoken in a video cannot be imported.** Social imports read the caption.
   Instagram in particular often refuses to hand captions to servers; when that happens the app
   says so and you can paste the caption as text.
-- **Family sharing has no logins.** A family is protected only by its code. The cart and the
-  meal plan are not shared, only recipes.
+- **Family sharing has no logins.** A family is protected only by its code. Recipes and the cart
+  are shared; the meal plan is not.
 - **Ordering groceries opens the store's search, item by item** (Barbora and Rimi in Lithuania,
   nemlig.com in Denmark). These stores offer no way for an app to fill a basket.
 - **Nutrition is an estimate** from about 110 common foods. Recipes that state their own

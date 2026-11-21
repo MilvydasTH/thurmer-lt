@@ -346,6 +346,8 @@ export function Check({
         onPress={onPress}
         accessibilityRole="checkbox"
         accessibilityState={{ checked }}
+        // The web build reads the ticked state from this attribute, not from accessibilityState.
+        aria-checked={checked}
         accessibilityLabel={label}
         style={({ pressed }) => ({ flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: 10, opacity: pressed ? 0.6 : 1 })}>
         <View

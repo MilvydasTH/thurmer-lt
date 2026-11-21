@@ -25,7 +25,7 @@ export function FamilySection() {
   const t = useT();
   const c = useColors();
   const family = useStore((s) => s.family);
-  const pending = useStore((s) => s.dirty.length + s.tombstones.length);
+  const pending = useStore((s) => s.dirty.length + s.tombstones.length + s.cartDirty.length + s.cartGone.length);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<'create' | 'join'>('create');
   const [familyName, setFamilyName] = useState('');

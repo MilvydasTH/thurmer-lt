@@ -160,6 +160,8 @@ export interface GroceryItem {
   recipeId?: string;
   recipeTitle?: string;
   createdAt: number;
+  /** When the item last changed (added, ticked, unticked); used to settle edits between family phones. */
+  updatedAt?: number;
 }
 
 export interface Settings {
